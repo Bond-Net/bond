@@ -5,7 +5,7 @@ With **BOND** we try to solve this exact problem, not by adding a third party as
 
 >Trust is a difficult thing to gain from an individual -especially a stranger- **and with BOND you do not have to !**
 
-The biggest convinience that password managers have to deliver is, the ability of _cross-platform logins_. But in order to achieve this functionality you have to trust them. With **BOND** you never have to trust anyone but yourself. **BOND** can function as a local-device or a decentralized-online password manager - the choice is yours.<br><br>
+The biggest convinience that password managers have to deliver is, the ability of _cross-platform logins_. But in order to achieve this functionality you have to trust them. With **BOND** you never have to trust anyone but yourself. **BOND** can function as a local-device or a decentralized-online password manager - the choice is yours.<br>
 
 Every user who wants to create bonds, has to allocate a set amount of storage and bandwidth on his device in order to connect to the bondNet. The amount of storage he gives, is the amount of storage he has in the bondNet to store his passwords.<br>
 
