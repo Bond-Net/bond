@@ -1,5 +1,5 @@
 # BOND 
-> The first truly decentralized password manager<br>
+The first truly decentralized password manager<br>
 As our digital footprints increase by the day, safety is becoming more and more difficult to obtain. <br>
 With **BOND** we try to solve this exact problem, by not adding a layer of trust, but by removing one.<br>
 With **BOND** we try to solve this exact problem, not by adding a third party as a layer of trust, but by giving YOU the control of  your own security.
