@@ -1,4 +1,4 @@
-# BOND
+# BOND - The first truly decentralised password manager
 As our digital footprints increase by the day, safety is becoming more and more difficult to obtain. With Bond we try to solve this exact problem, by not adding a layer of trust, but by removing one.
 
 Trust is a difficult thing to gain from another one, so why should you trust us ? - **Because you do not have to !**
@@ -13,3 +13,8 @@ Every user has a bonds-list, aswell as a key-file, the key-file is always encryp
 
 Every user has to give a set amount of storage from his device and set ammount of bandwidth in order to enter the pool-list.
 The amount of storage he gives, is the amount of storage space he has in the pool-list.
+
+## Parts of the project
+1. Password generator with 5-levels  of strength
+2. Password manager for as many passwords as you give storage for
+3. Bonds created from you with other user
