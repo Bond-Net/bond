@@ -10,15 +10,10 @@ The biggest convinience that password managers have to deliver is, the ability o
 Every user who wants to create bonds, has to allocate a set amount of storage and bandwidth on his device in order to connect to the bondNet. The amount of storage he gives, is the amount of storage he has in the bondNet to store his passwords.<br>
 
 1. Locally **BOND** creates a key-vault with SHA-256 encryption for which only you have the key.
-2. Online **BOND** creates a key-vault and a bond-list with SHA-256 encryption for which only you have the key, but destributes the fragmented key-vault to your bonds in your bond-list.
+2. If you want to create bonds, **BOND** creates a bond-list with SHA-256 encryption with the same master-key and then fragments  the key-vault and destributs it, the bonds in your bond-list.
 
 >This decentralized approach allows security-of-scale, which means the more bonds you have the safer your data is.<br>
 Users can store their data online without any-one entity having control over it. Bonds are created per-user which allows users to create relationships with other **BOND** users.
-
-Every user has a bonds-list, aswell as a key-vault, the key-vault is always encrypted. Access to it is granted to the one holding the master-key (usb key). The more bonds you have the more segments your key-vault is split into. This means that increasing the number of active bonds increases your safety and as only fragments of encryted data are stored across other devices your data is 100% safe.
-
-Every user has to give a set amount of storage from his device and set ammount of bandwidth in order to enter the pool-list.
-The amount of storage he gives, is the amount of storage  he has in the pool-list.
 
 ## Functions of the BOND
 1. Password generator with 5-levels  of strength
