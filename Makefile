@@ -1,7 +1,7 @@
 all:
 	clear
 
-	g++ -o bond pass_read.cpp bond.cpp
+	g++ -o bond bond.cpp pass_read.cpp sha256.cpp
 
 	./bond 
 	

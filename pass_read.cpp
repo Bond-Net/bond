@@ -1,3 +1,6 @@
+#ifndef PASS_READ_H
+#define PASS_READ_H
+
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -52,3 +55,5 @@ getpass(bool show_asterisk=true)
 	std::cout << std::endl;
 	return password;
 }
+
+#endif
