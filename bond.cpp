@@ -217,7 +217,9 @@ main(int argc, char *argv[])
 					continue;
 				}
 
-				std::cout	<< "Correct password you have unlocked the vault !"
+				std::cout	<< "code is:   " << master_key << std::endl
+							<< "sha256 is: " << sha256_key_c << std::endl
+							<< "Correct password you have unlocked the vault !"
 							<< std::endl << std::endl;
 				break;
 			}
@@ -282,33 +284,32 @@ main(int argc, char *argv[])
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *file_db;
-
-				file_db = fopen("keylist.dat", "wb");
+				FILE *file_db = fopen("keylist.dat", "wb");
 				if(file_db == NULL)
 				{
 					printf("Error opening keylist.dat\n");
 					exit(1);
 				}
-
+				fwrite(sha256_key_c, sizeof(char) * 70, 1, file_db);
 				fclose(file_db);
 			}
 		}
-		else if(strcmp(argv[1], "--delete") == 0) 
+		else if(strcmp(argv[1], "--delete-file") == 0) 
 		{
+			// deleting the file
 			remove("keylist.dat");
 		}
 		else if(strcmp(argv[1], "--insert") == 0 && argc != 4) 
 		{
 			struct binary_reg append_movie;
-			FILE *new_file_db;
-
-			new_file_db = fopen("new_keylist.dat", "ab");
+			FILE *new_file_db = fopen("new_keylist.dat", "ab");
 			if(new_file_db == NULL)
 			{
 				printf("Error opening keylist.dat\n");
 				exit(1);
 			}
+
+			fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
 
 			reader = head;
 			while(reader != NULL)
@@ -330,17 +331,17 @@ main(int argc, char *argv[])
 			remove("keylist.dat");
 			rename("new_keylist.dat", "keylist.dat");
 		}
-		else if(strcmp(argv[1], "--delete") == 0 && argc != 2)
+		else if(strcmp(argv[1], "--delete-pass") == 0 && argc != 2)
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db;
-				new_file_db = fopen("new_keylist.dat", "w");
+				FILE *new_file_db = fopen("new_keylist.dat", "w");
 				if(new_file_db == NULL)
 				{
 					printf("Error opening keylist.dat\n");
 					exit(1);
 				}
+				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
 
 				reader = head;
 				while(reader != NULL)
@@ -395,13 +396,13 @@ main(int argc, char *argv[])
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db;
-				new_file_db = fopen("new_keylist.dat", "w");
+				FILE *new_file_db = fopen("new_keylist.dat", "w");
 				if(new_file_db == NULL)
 				{
 					printf("Error opening keylist.dat\n");
 					exit(1);
 				}
+				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
 
 				reader = head;
 				while(reader != NULL)
@@ -429,17 +430,17 @@ main(int argc, char *argv[])
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db;
-
-				new_file_db = fopen("new_keylist.dat", "w");
+				FILE *new_file_db = fopen("new_keylist.dat", "w");
 				if(new_file_db == NULL)
 				{
 					printf("Error opening keylist.dat\n");
 					exit(1);
 				}
+				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
+
 				reader = head;
 				sort(reader);
-			
+				
 				reader = head;
 				while(reader != NULL)
 				{
@@ -458,13 +459,13 @@ main(int argc, char *argv[])
 			printf(
 				"Usage: %s <command>, commands are:\n"
 				"\t--insert <new identity> <new username> <new password>\n"
-				"\t--delete <identity> <username>\n"
+				"\t--delete-pass <identity> <username>\n"
+				"\t--delete-file\n"
 				"\t--edit <identity> <username> <new password>\n"
 				"\t--list-all\n"
 				"\t--list-from <identity>\n"
-				"\t--sort\n"
+				"\t--sort (alphabetically)\n"
 				"\t--reset\n"
-				"\t--delete\n"
 				,
 				argv[1]
 			);
@@ -475,13 +476,13 @@ main(int argc, char *argv[])
 		printf(
 			"Usage: %s <command>, commands are:\n"
 			"\t--insert <new identity> <new username> <new password>\n"
-			"\t--delete <identity> <username>\n"
+			"\t--delete-pass <identity> <username>\n"
+			"\t--delete-file\n"
 			"\t--edit <identity> <username> <new password>\n"
 			"\t--list-all\n"
 			"\t--list-from <identity>\n"
-			"\t--sort\n"
+			"\t--sort (alphabetically)\n"
 			"\t--reset\n"
-			"\t--delete\n"
 			,
 			argv[0]
 		);
