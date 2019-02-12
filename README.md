@@ -1,7 +1,7 @@
 # [**BOND**](https://github.com/keybraker/BOND) <sup>*The first truly decentralized password manager*<sup>
 
-![alt text](https://raw.githubusercontent.com/keybraker/BOND/master/bond_logo.png?token=AWX2itoKyjghoLvLN0jzD4YN6qtwITCAks5cYknxwA%3D%3D)
-<button class="button-save large">Big Fat Button</button>
+![alt text](https://raw.githubusercontent.com/keybraker/BOND/master/bond_logo.png?token=AWX2ivKkoqvL-vRRhwtRsRSLgYBLK8S-ks5cYkuBwA%3D%3D)
+
 As our digital footprints increase by the day, safety is becoming more and more difficult to obtain.<br>
 With [**BOND**](https://github.com/keybraker/BOND) we try to solve this exact problem, not by adding a third party as a layer of trust, but by giving you the control of  your own security.
 
