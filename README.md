@@ -1,6 +1,6 @@
 # [**BOND**](https://github.com/keybraker/BOND) <sup>*The first truly decentralized password manager*<sup>
 
-![alt text](https://raw.githubusercontent.com/keybraker/BOND/master/bond_logo.png?token=AWX2ivKkoqvL-vRRhwtRsRSLgYBLK8S-ks5cYkuBwA%3D%3D)
+![alt text](https://raw.githubusercontent.com/keybraker/BOND/master/img/bond_logo.png)
 
 As our digital footprints increase by the day, safety is becoming more and more difficult to obtain.<br>
 With [**BOND**](https://github.com/keybraker/BOND) we try to solve this exact problem, not by adding a third party as a layer of trust, but by giving you the control of  your own security.
@@ -24,3 +24,5 @@ Users can store their data online without any-one entity having control over it.
 1. Password generator with 5-levels  of strength
 2. Password manager for as many passwords as you give storage for
 3. Bonds created from you with other user
+
+![alt text](https://raw.githubusercontent.com/keybraker/BOND/master/img/bond_explanation.png)
