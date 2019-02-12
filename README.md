@@ -21,8 +21,8 @@ Every user who wants to create bonds, has to allocate a set amount of storage an
 Users can store their data online without any-one entity having control over it. Bonds are created per-user which allows users to create relationships with other [**BOND**](https://github.com/keybraker/BOND) users.
 
 ## Functions of the [**BOND**](https://github.com/keybraker/BOND)
-1. Password generator with 5-levels  of strength
-2. Password manager for as many passwords as you give storage for
+1. Password generator with strong passwords
+2. Password manager for as many passwords as you want
 3. Bonds created from you with other user
 
 ![alt text](https://github.com/keybraker/BOND/blob/master/img/bond_explanation.png)
