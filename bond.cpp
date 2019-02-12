@@ -9,7 +9,6 @@
 #include <fstream>		//File I/O
 #include <iomanip>		//Convenient spacing
 #include <cstring>		//Manipulate c-strings
-#include <bits/stdc++.h>
 
 #include "pass_gen/pass_gen.hpp"
 #include "key_encryption/encrypt.h"
@@ -161,19 +160,6 @@ decrypt(struct binary_reg **head, struct binary_reg **tail, std::string master_k
 	
 	if(not_gone_through) *head = NULL;
 	else row_from_db_prev->next = NULL;
-}
-
-std::vector<std::string>
-split(const std::string& s, char delimiter)
-{
-   std::vector<std::string> tokens;
-   std::string token;
-   std::istringstream tokenStream(s);
-   while (std::getline(tokenStream, token, delimiter))
-   {
-      tokens.push_back(token);
-   }
-   return tokens;
 }
 
 int
