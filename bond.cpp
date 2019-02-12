@@ -12,8 +12,8 @@
 
 #include "pass_gen/pass_gen.hpp"
 #include "key_encryption/encrypt.h"
-#include "pass_read.hpp"
-#include "sha256.hpp"
+#include "pass_read/pass_read.hpp"
+#include "sha256/sha256.hpp"
 
 #define bold_on		"\033[1m"
 #define bold_off	"\033[22m"
@@ -23,99 +23,6 @@ inline bool file_exists(const std::string& name)
 	struct stat buffer;
 	return (stat (name.c_str(), &buffer) == 0);
 }
-
-/*
-int main(int argc, char** argv)
-{
-	std::string curr_key, key, msg, encrypted_msg, decrypted_msg;
-
-	if(file_exists("key-list.bin"))
-	{
-		std::cout	<< "Enter the master key in order to open the vault: "
-					<< std::endl << std::endl;
-	}
-	else
-	{
-		std::cout	<< "It seems like you have no key list." << std::endl
-					<< "Enter your new master key (remember to write it down)" << std::endl;
-					
-		while(true)
-		{
-			std::cout << "> enter master key:\t";
-			key = sha256(getpass());
-
-			std::cout	<< "> re-enter master key:\t";
-			if(sha256(getpass()) == key)
-				break;
-			else
-				std::cout	<< bold_on << "(your passwords did not match, please retry)"
-							<< bold_off<< std::endl << std::endl;
-		}
-	}
-
-	//Create a pass_gen object using user-defined variables
-	pass_gen new_pass(rand() % 20 + 12, 1, 1, 1, 1);
-	//Output based on amount requested
-	cout << new_pass.printPass(false) << std::endl;
-
-	
-
-	std::cout	<< std::endl << "Tell me your msg: "; 
-	cin >> msg;
-
-	while(true)
-	{
-		std::cout	<< std::endl << "Please enter the master key in order to encrypt the message: ";
-		curr_key = getpass();
-		if(sha256(curr_key) == key)
-		{
-			encrypted_msg = encrypt(msg, curr_key);
-			curr_key = "";
-			break;
-		}
-		else
-		{
-			std::cout	<< std::endl
-						<< "Your passwords did not match, please retry"
-						<< std::endl << std::endl;
-		}
-	}
-
-	std::cout 	<< "Your message is encrypted with your password, that we do not know."
-				<< std::endl
-				<< "The encrypted message is : " 
-				<< encrypted_msg << std::endl;
-
-	while(true)
-	{
-		std::cout	<< "Please enter the master key in order to decrypt the message : ";
-		curr_key = getpass();
-		if(sha256(curr_key) == key)
-		{
-			decrypted_msg = decrypt(encrypted_msg, curr_key);
-			curr_key = "";
-			break;
-		}
-		else
-		{
-			std::cout	<< std::endl
-						<< "Your passwords did not match, please retry"
-						<< std::endl << std::endl;
-		}
-	}
-
-	std::cout	<< "The decrypted message is : " << decrypted_msg << std::endl;
-
-
-	std::cout	<< std::endl
-				<< "Creating your binary database with all your encrypted passwords" 
-				<< std::endl << std::endl;
-
-	return 0;
-}
-*/
-//////////////////////////////////////////////////////
-
 
 struct binary_reg
 {
@@ -177,22 +84,99 @@ sort(struct binary_reg *head)
 	check(reader);
 }
 
+FILE *
+file_open(std::string file, std::string type)
+{
+	FILE *file_db = fopen(file.c_str(), type.c_str());
+	if(file_db == NULL)
+	{
+		printf("Error opening keylist.dat\n");
+		exit(1);
+	}
+	return file_db;
+}
+
+void
+encrypt(struct binary_reg *head, char *name, char *sha256_key_c, std::string master_key)
+{
+	std::string
+		msg;
+	struct binary_reg
+		*reader = head;
+	FILE
+		*new_file_db = file_open("new_keylist.dat", "w");
+
+	fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
+
+	while(reader != NULL)
+	{
+		//decrypt
+		strcpy(reader->identity, encrypt(msg=reader->identity, master_key).c_str());
+		strcpy(reader->username, encrypt(msg=reader->username, master_key).c_str());
+		strcpy(reader->password, encrypt(msg=reader->password, master_key).c_str());
+
+		fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
+		reader = reader->next;
+	}
+
+	fclose(new_file_db);
+
+	remove(name);
+	rename("new_keylist.dat", name);
+}
+
+struct binary_reg *
+decrypt(std::string master_key, FILE *file_db)
+{
+	std::string
+		msg;
+	struct binary_reg
+		*head = NULL,
+		*row_from_db_prev = NULL,
+		*row_from_db = NULL;
+	int
+		not_gone_through = 1;
+
+	row_from_db = (binary_reg *) malloc (sizeof(struct binary_reg));
+	head = row_from_db;
+
+	while (fread(row_from_db, sizeof(struct binary_reg), 1, file_db) != 0)
+	{
+		//decrypt
+		strcpy(row_from_db->identity, decrypt(msg=row_from_db->identity, master_key).c_str());
+		strcpy(row_from_db->username, decrypt(msg=row_from_db->username, master_key).c_str());
+		strcpy(row_from_db->password, decrypt(msg=row_from_db->password, master_key).c_str());
+
+		row_from_db->next = (binary_reg *) malloc (sizeof(struct binary_reg));
+		row_from_db_prev = row_from_db;
+		row_from_db = row_from_db->next;
+
+		not_gone_through = 0;
+	}
+
+	if(not_gone_through) head = NULL;
+	else row_from_db_prev->next = NULL;
+
+	return head;
+}
+
 int
 main(int argc, char *argv[])
 {
-	std::string 
+	std::string
+		msg,
 		master_key,
 		sha256_key;
-	char 
+	char
 		sha256_key_c[64];
-	struct binary_reg 
+	struct binary_reg
 		*head = NULL,
 		*reader = NULL,
 		*row_from_db_prev = NULL,
 		*row_from_db = NULL;
-	int 
+	int
 		not_gone_through = 1;
-	FILE 
+	FILE
 		*file_db;
 
 
@@ -201,7 +185,7 @@ main(int argc, char *argv[])
 		std::cout	<< "Enter the master key in order to open the vault: "
 					<< std::endl << std::endl;
 
-		file_db = fopen("keylist.dat", "r");
+		file_db = file_open("keylist.dat", "r");
 		if(fread(sha256_key_c, sizeof(char) * 70, 1, file_db) != 0)
 		{
 			sha256_key = sha256_key_c;
@@ -224,25 +208,8 @@ main(int argc, char *argv[])
 				break;
 			}
 		}
-		else
-		{
-			printf("key list is empty\n");
-		}
 
-		row_from_db = (binary_reg *) malloc (sizeof(struct binary_reg));
-		head = row_from_db;
-
-		while (fread(row_from_db, sizeof(struct binary_reg), 1, file_db) != 0)
-		{
-			row_from_db->next = (binary_reg *) malloc (sizeof(struct binary_reg));
-			row_from_db_prev = row_from_db;
-			row_from_db = row_from_db->next;
-
-			not_gone_through = 0;
-		}
-
-		if(not_gone_through) head = NULL;
-		else row_from_db_prev->next = NULL;
+		head = decrypt(master_key, file_db);
 
 		fclose(file_db);
 	}
@@ -280,35 +247,26 @@ main(int argc, char *argv[])
 
 	if(argc >= 2)
 	{
-		if(strcmp(argv[1], "--reset") == 0) 
+		if(strcmp(argv[1], "--reset") == 0)
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *file_db = fopen("keylist.dat", "wb");
-				if(file_db == NULL)
-				{
-					printf("Error opening keylist.dat\n");
-					exit(1);
-				}
+				FILE *file_db = file_open("keylist.dat", "wb");
 				fwrite(sha256_key_c, sizeof(char) * 70, 1, file_db);
 				fclose(file_db);
 			}
 		}
-		else if(strcmp(argv[1], "--delete-file") == 0) 
+		else if(strcmp(argv[1], "--delete-file") == 0)
 		{
 			// deleting the file
 			remove("keylist.dat");
 		}
-		else if(strcmp(argv[1], "--insert") == 0 && argc != 4) 
+		else if(strcmp(argv[1], "--insert") == 0)
 		{
+			std::string msg;
 			struct binary_reg append_movie;
-			FILE *new_file_db = fopen("new_keylist.dat", "ab");
-			if(new_file_db == NULL)
-			{
-				printf("Error opening keylist.dat\n");
-				exit(1);
-			}
 
+			FILE *new_file_db = file_open("new_keylist.dat", "ab");
 			fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
 
 			reader = head;
@@ -318,9 +276,9 @@ main(int argc, char *argv[])
 				reader = reader->next;
 			}
 
-			strcpy (append_movie.identity, argv[2]);
-			strcpy (append_movie.username, argv[3]);
-			strcpy (append_movie.password, argv[4]);
+			strcpy(append_movie.identity, encrypt(msg=argv[2], master_key).c_str());
+			strcpy(append_movie.username, encrypt(msg=argv[3], master_key).c_str());
+			strcpy(append_movie.password, encrypt(msg=argv[4], master_key).c_str());
 
 			append_movie.next = NULL;
 		
@@ -331,22 +289,18 @@ main(int argc, char *argv[])
 			remove("keylist.dat");
 			rename("new_keylist.dat", "keylist.dat");
 		}
-		else if(strcmp(argv[1], "--delete-pass") == 0 && argc != 2)
+		else if(strcmp(argv[1], "--delete-pass") == 0)
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db = fopen("new_keylist.dat", "w");
-				if(new_file_db == NULL)
-				{
-					printf("Error opening keylist.dat\n");
-					exit(1);
-				}
+				FILE *new_file_db = file_open("new_keylist.dat", "w");
 				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
 
 				reader = head;
 				while(reader != NULL)
 				{
-					if((strcmp(reader->identity, argv[2]) + strcmp(reader->username, argv[3])) != 0)
+					if((strcmp(reader->identity, argv[2]) +
+						strcmp(reader->username, argv[3])) != 0)
 							fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
 
 					reader = reader->next;
@@ -374,7 +328,7 @@ main(int argc, char *argv[])
 				}
 			}
 		}
-		else if(strcmp(argv[1], "--list-from") == 0) 
+		else if(strcmp(argv[1], "--list-from") == 0)
 		{
 			if(file_exists("keylist.dat"))
 			{
@@ -396,12 +350,7 @@ main(int argc, char *argv[])
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db = fopen("new_keylist.dat", "w");
-				if(new_file_db == NULL)
-				{
-					printf("Error opening keylist.dat\n");
-					exit(1);
-				}
+				FILE *new_file_db = file_open("new_keylist.dat", "w");
 				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
 
 				reader = head;
@@ -430,12 +379,7 @@ main(int argc, char *argv[])
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db = fopen("new_keylist.dat", "w");
-				if(new_file_db == NULL)
-				{
-					printf("Error opening keylist.dat\n");
-					exit(1);
-				}
+				FILE *new_file_db = file_open("new_keylist.dat", "w");
 				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
 
 				reader = head;
@@ -489,5 +433,4 @@ main(int argc, char *argv[])
 	}
 
 	return 0;
-
 }
