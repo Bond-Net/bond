@@ -9,6 +9,7 @@
 #include <fstream>		//File I/O
 #include <iomanip>		//Convenient spacing
 #include <cstring>		//Manipulate c-strings
+#include <bits/stdc++.h>
 
 #include "pass_gen/pass_gen.hpp"
 #include "key_encryption/encrypt.h"
@@ -52,11 +53,11 @@ void change(struct binary_reg *a, struct binary_reg *b)
 
 void check(struct binary_reg *start)
 {
-	int swapped;
-	struct binary_reg *current;
-	struct binary_reg *next_one = NULL;
-
-	if (current == NULL) return;
+	int
+		swapped;
+	struct binary_reg
+		*current = NULL,
+		*next_one = NULL;
 
 	do
 	{
@@ -97,8 +98,10 @@ file_open(std::string file, std::string type)
 }
 
 void
-encrypt(struct binary_reg *head, char *name, char *sha256_key_c, std::string master_key)
+encrypt(struct binary_reg *head, std::string name, std::string sha256_key, std::string master_key)
 {
+	if(head == NULL) return;
+
 	std::string
 		msg;
 	struct binary_reg
@@ -106,7 +109,7 @@ encrypt(struct binary_reg *head, char *name, char *sha256_key_c, std::string mas
 	FILE
 		*new_file_db = file_open("new_keylist.dat", "w");
 
-	fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
+	fwrite(sha256_key.c_str(), sizeof(char) * 70, 1, new_file_db);
 
 	while(reader != NULL)
 	{
@@ -121,24 +124,25 @@ encrypt(struct binary_reg *head, char *name, char *sha256_key_c, std::string mas
 
 	fclose(new_file_db);
 
-	remove(name);
-	rename("new_keylist.dat", name);
+	remove(name.c_str());
+	rename("new_keylist.dat", name.c_str());
 }
 
-struct binary_reg *
-decrypt(std::string master_key, FILE *file_db)
+void
+decrypt(struct binary_reg **head, struct binary_reg **tail, std::string master_key, FILE *file_db)
 {
 	std::string
 		msg;
 	struct binary_reg
-		*head = NULL,
 		*row_from_db_prev = NULL,
 		*row_from_db = NULL;
 	int
 		not_gone_through = 1;
 
 	row_from_db = (binary_reg *) malloc (sizeof(struct binary_reg));
-	head = row_from_db;
+
+	*head = row_from_db;
+	*tail = row_from_db;
 
 	while (fread(row_from_db, sizeof(struct binary_reg), 1, file_db) != 0)
 	{
@@ -146,18 +150,30 @@ decrypt(std::string master_key, FILE *file_db)
 		strcpy(row_from_db->identity, decrypt(msg=row_from_db->identity, master_key).c_str());
 		strcpy(row_from_db->username, decrypt(msg=row_from_db->username, master_key).c_str());
 		strcpy(row_from_db->password, decrypt(msg=row_from_db->password, master_key).c_str());
-
+		
 		row_from_db->next = (binary_reg *) malloc (sizeof(struct binary_reg));
 		row_from_db_prev = row_from_db;
 		row_from_db = row_from_db->next;
 
 		not_gone_through = 0;
 	}
-
-	if(not_gone_through) head = NULL;
+	*tail = row_from_db_prev;
+	
+	if(not_gone_through) *head = NULL;
 	else row_from_db_prev->next = NULL;
+}
 
-	return head;
+std::vector<std::string>
+split(const std::string& s, char delimiter)
+{
+   std::vector<std::string> tokens;
+   std::string token;
+   std::istringstream tokenStream(s);
+   while (std::getline(tokenStream, token, delimiter))
+   {
+      tokens.push_back(token);
+   }
+   return tokens;
 }
 
 int
@@ -165,20 +181,27 @@ main(int argc, char *argv[])
 {
 	std::string
 		msg,
+		usr_msg1,
+		usr_msg2,
+		usr_msg3,
+		usr_msg4,
 		master_key,
 		sha256_key;
 	char
 		sha256_key_c[64];
 	struct binary_reg
 		*head = NULL,
+		*tail = NULL,
 		*reader = NULL,
+		*prev = NULL,
 		*row_from_db_prev = NULL,
 		*row_from_db = NULL;
 	int
 		not_gone_through = 1;
 	FILE
 		*file_db;
-
+	std::vector
+		<std::string> tokens;
 
 	if(file_exists("keylist.dat"))
 	{
@@ -209,7 +232,7 @@ main(int argc, char *argv[])
 			}
 		}
 
-		head = decrypt(master_key, file_db);
+		decrypt(&head, &tail, master_key, file_db);
 
 		fclose(file_db);
 	}
@@ -245,9 +268,17 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if(argc >= 2)
+	while(true)
 	{
-		if(strcmp(argv[1], "--reset") == 0)
+		cout << "\n" bold_on "command: " bold_off;
+		cin >> usr_msg1;
+		if(usr_msg1 == "exit") 
+		{
+			encrypt(head, "keylist.dat", sha256_key, master_key);
+			break;
+		}
+
+		if(usr_msg1 == "reset")
 		{
 			if(file_exists("keylist.dat"))
 			{
@@ -255,181 +286,220 @@ main(int argc, char *argv[])
 				fwrite(sha256_key_c, sizeof(char) * 70, 1, file_db);
 				fclose(file_db);
 			}
+			else
+			{
+				cout << "you do not have a key list" << std::endl;
+			}
 		}
-		else if(strcmp(argv[1], "--delete-file") == 0)
+		else if(usr_msg1 == "delete-file")
 		{
 			// deleting the file
 			remove("keylist.dat");
+			head= NULL;
+			tail = NULL;
 		}
-		else if(strcmp(argv[1], "--insert") == 0)
+		else if(usr_msg1 == "insert")
 		{
-			std::string msg;
-			struct binary_reg append_movie;
+			cout << "\n" bold_on "enter <new identity> <new username> <new password>: " bold_off;
+			cin >> usr_msg2 >> usr_msg3 >> usr_msg4;
 
-			FILE *new_file_db = file_open("new_keylist.dat", "ab");
-			fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
-
-			reader = head;
-			while(reader != NULL)
+			if(head == NULL)
 			{
-				fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
-				reader = reader->next;
+				head = (binary_reg *) malloc (sizeof(struct binary_reg));
+
+				strcpy(head->identity, usr_msg2.c_str());
+				strcpy(head->username, usr_msg3.c_str());
+				strcpy(head->password, usr_msg4.c_str());
+				
+				tail = head;
 			}
+			else
+			{
+				tail->next = (binary_reg *) malloc (sizeof(struct binary_reg));
+				tail->next->next = NULL;
 
-			strcpy(append_movie.identity, encrypt(msg=argv[2], master_key).c_str());
-			strcpy(append_movie.username, encrypt(msg=argv[3], master_key).c_str());
-			strcpy(append_movie.password, encrypt(msg=argv[4], master_key).c_str());
-
-			append_movie.next = NULL;
-		
-			fwrite(&append_movie, sizeof(struct binary_reg), 1, new_file_db);
-
-			fclose(new_file_db);
-
-			remove("keylist.dat");
-			rename("new_keylist.dat", "keylist.dat");
+				strcpy(tail->next->identity, usr_msg2.c_str());
+				strcpy(tail->next->username, usr_msg3.c_str());
+				strcpy(tail->next->password, usr_msg4.c_str());
+				
+				tail = tail->next;
+			}
 		}
-		else if(strcmp(argv[1], "--delete-pass") == 0)
+		else if(usr_msg1 == "delete-pass")
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db = file_open("new_keylist.dat", "w");
-				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
-
-				reader = head;
-				while(reader != NULL)
+				if(head == NULL)
 				{
-					if((strcmp(reader->identity, argv[2]) +
-						strcmp(reader->username, argv[3])) != 0)
-							fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
-
-					reader = reader->next;
+					cout << "your key list is empty" << std::endl;
 				}
-
-				fclose(new_file_db);
-
-				remove("keylist.dat");
-				rename("new_keylist.dat", "keylist.dat");
-			}
-		}
-		else if(strcmp(argv[1], "--list-all") == 0)
-		{
-			if(file_exists("keylist.dat"))
-			{
-				reader = head;
-				while(reader != NULL)
+				else
 				{
-					printf(
-						"identity: %-20s username: %-20s password: %-20s\n",
-						reader->identity ,reader->username ,reader->password
-					);
+					cout << "\n" bold_on "enter <identity> <username> of the password you want to delete: " bold_off;
+					cin >> usr_msg2 >> usr_msg3;
 
-					reader = reader->next;
+					reader = head;
+					prev = NULL;
+					while(reader != NULL)
+					{
+						if((strcmp(reader->identity, usr_msg2.c_str()) +
+							strcmp(reader->username, usr_msg3.c_str())) == 0)
+						{
+							if(prev == NULL)
+							{
+								head = head->next;
+							}
+							else if(reader->next != NULL)
+							{
+								prev->next = reader->next;
+							}
+							else
+							{
+								prev->next = NULL;
+								tail = prev;
+							}
+
+							free(reader);
+							break;
+						}
+
+						prev = reader;
+						reader = reader->next;
+					}
+
+					if(reader == NULL) cout << "Did not find entry" << std::endl;
 				}
 			}
+			else
+			{
+				cout << "you do not have a key list" << std::endl;
+			}
 		}
-		else if(strcmp(argv[1], "--list-from") == 0)
+		else if(usr_msg1 == "list-all")
 		{
 			if(file_exists("keylist.dat"))
 			{
-				reader = head;
-				while(reader != NULL)
+				if(head == NULL)
 				{
-					if(!strcmp(reader->identity, argv[2]))
+					cout << "your key list is empty" << std::endl;
+				}
+				else
+				{
+					reader = head;
+					while(reader != NULL)
 					{
 						printf(
 							"identity: %-20s username: %-20s password: %-20s\n",
 							reader->identity ,reader->username ,reader->password
 						);
+
+						reader = reader->next;
 					}
-					reader = reader->next;
 				}
 			}
+			else
+			{
+				cout << "you do not have a key list" << std::endl;
+			}
 		}
-		else if(strcmp(argv[1], "--edit") == 0)
+		else if(usr_msg1 == "list-from")
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db = file_open("new_keylist.dat", "w");
-				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
-
-				reader = head;
-				while(reader != NULL)
+				if(head == NULL)
 				{
-					if((strcmp(reader->identity, argv[2]) + strcmp(reader->username, argv[3])) != 0)
-					{
-						fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
-					}
-					else
-					{
-						strcpy(reader->password, argv[4]);
-						fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
-					}
-
-					reader = reader->next;
+					cout << "your key list is empty" << std::endl;
 				}
+				else
+				{
+					cout << "\n" bold_on "enter <identity> you want to see credentials: " bold_off;
+					cin >> usr_msg2;
 
-				fclose(new_file_db);
-
-				remove("keylist.dat");
-				rename("new_keylist.dat", "keylist.dat");
+					reader = head;
+					while(reader != NULL)
+					{
+						if(!strcmp(reader->identity, usr_msg2.c_str()))
+						{
+							printf(
+								"identity: %-20s username: %-20s password: %-20s\n",
+								reader->identity ,reader->username ,reader->password
+							);
+						}
+						reader = reader->next;
+					}
+				}
+			}
+			else
+			{
+				cout << "you do not have a key list" << std::endl;
 			}
 		}
-		else if(strcmp(argv[1], "--sort") == 0)
+		else if(usr_msg1 == "edit")
 		{
 			if(file_exists("keylist.dat"))
 			{
-				FILE *new_file_db = file_open("new_keylist.dat", "w");
-				fwrite(sha256_key_c, sizeof(char) * 70, 1, new_file_db);
-
-				reader = head;
-				sort(reader);
-				
-				reader = head;
-				while(reader != NULL)
+				if(head == NULL)
 				{
-					fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
-					reader = reader->next;
+					cout << "your key list is empty" << std::endl;
 				}
+				else
+				{
+					cout << "\n" bold_on "enter <identity> <username> <new password> you want to edit: " bold_off;
+					cin >> usr_msg2 >> usr_msg3 >> usr_msg4;
 
-				fclose(new_file_db);
+					reader = head;
+					while(reader != NULL)
+					{
+						if((strcmp(reader->identity, usr_msg2.c_str()) +
+							strcmp(reader->username, usr_msg3.c_str())) == 0)
+						{
+							strcpy(reader->password, usr_msg4.c_str());
+							break;
+						}
 
-				remove("keylist.dat");
-				rename("new_keylist.dat", "keylist.dat");
+						reader = reader->next;
+					}
+				}
+			}
+			else
+			{
+				cout << "you do not have a key list" << std::endl;
+			}
+		}
+		else if(usr_msg1 == "sort")
+		{
+			if(head == NULL)
+			{
+				cout << "your key list is empty" << std::endl;
+			}
+			else
+			{
+				if(file_exists("keylist.dat"))
+				{
+					reader = head;
+					sort(reader);
+				}
+				else
+				{
+					cout << "you do not have a key list" << std::endl;
+				}
 			}
 		}
 		else
 		{
 			printf(
-				"Usage: %s <command>, commands are:\n"
-				"\t--insert <new identity> <new username> <new password>\n"
-				"\t--delete-pass <identity> <username>\n"
-				"\t--delete-file\n"
-				"\t--edit <identity> <username> <new password>\n"
-				"\t--list-all\n"
-				"\t--list-from <identity>\n"
-				"\t--sort (alphabetically)\n"
-				"\t--reset\n"
-				,
-				argv[1]
+				"Usage: ./bond <command>, commands are:\n"
+				"\tinsert\n"
+				"\tdelete-pass\n"
+				"\tdelete-file\n"
+				"\tedit\n"
+				"\tlist-all\n"
+				"\tlist-from\n"
+				"\tsort (alphabetically)\n"
+				"\treset\n"
 			);
 		}
-	}
-	else
-	{
-		printf(
-			"Usage: %s <command>, commands are:\n"
-			"\t--insert <new identity> <new username> <new password>\n"
-			"\t--delete-pass <identity> <username>\n"
-			"\t--delete-file\n"
-			"\t--edit <identity> <username> <new password>\n"
-			"\t--list-all\n"
-			"\t--list-from <identity>\n"
-			"\t--sort (alphabetically)\n"
-			"\t--reset\n"
-			,
-			argv[0]
-		);
+
 	}
 
 	return 0;
