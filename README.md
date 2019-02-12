@@ -35,3 +35,10 @@ Bonds with other parties are a sort of relationship between you and the party. T
 > (if active bonds lessen balancing is done automatically to the remaining bonds)
 2. If number of active bonds becomes lower than 10, bond-list becomes in-active while a new bond must be established
 3. Every bond user has to has to hand a maximum of 10MBytes of on-board storage.
+
+---
+
+## Prerequisite installations
+
+ 
+## Installation
