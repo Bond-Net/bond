@@ -258,13 +258,13 @@ main(int argc, char *argv[])
 	{
 		cout << "\n" bold_on "command: " bold_off;
 		cin >> usr_msg1;
+
 		if(usr_msg1 == "exit") 
 		{
 			encrypt(head, "keylist.dat", sha256_key, master_key);
 			break;
 		}
-
-		if(usr_msg1 == "reset")
+		else if(usr_msg1 == "reset")
 		{
 			if(file_exists("keylist.dat"))
 			{
@@ -485,7 +485,6 @@ main(int argc, char *argv[])
 				"\treset\n"
 			);
 		}
-
 	}
 
 	return 0;
