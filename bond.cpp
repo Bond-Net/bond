@@ -6,9 +6,9 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
-#include <fstream>		//File I/O
-#include <iomanip>		//Convenient spacing
-#include <cstring>		//Manipulate c-strings
+#include <fstream>	//File I/O
+#include <iomanip>	//Convenient spacing
+#include <cstring>	//Manipulate c-strings
 
 #include "pass_gen/pass_gen.hpp"
 #include "key_encryption/encrypt.h"
@@ -18,13 +18,15 @@
 #define bold_on		"\033[1m"
 #define bold_off	"\033[22m"
 
-inline bool file_exists(const std::string& name)
+inline bool
+file_exists(const std::string& name)
 {
 	struct stat buffer;
 	return (stat (name.c_str(), &buffer) == 0);
 }
 
-struct binary_reg
+struct
+binary_reg
 {
 	char identity[32];
 	char username[32];
@@ -33,7 +35,8 @@ struct binary_reg
 	struct binary_reg *next;
 };
 
-void change(struct binary_reg *a, struct binary_reg *b)
+void
+change(struct binary_reg *a, struct binary_reg *b)
 {
 	struct binary_reg temp;
 
@@ -50,7 +53,8 @@ void change(struct binary_reg *a, struct binary_reg *b)
 	strcpy (b->password, temp.password);
 }
 
-void check(struct binary_reg *start)
+void
+check(struct binary_reg *start)
 {
 	int
 		swapped;
@@ -170,7 +174,7 @@ main(int argc, char *argv[])
 		usr_msg1,
 		usr_msg2,
 		usr_msg3,
-		usr_msg4,
+	  usr_msg4,
 		master_key,
 		sha256_key;
 	char
@@ -259,7 +263,7 @@ main(int argc, char *argv[])
 		cout << "\n" bold_on "command: " bold_off;
 		cin >> usr_msg1;
 
-		if(usr_msg1 == "exit") 
+		if(usr_msg1 == "exit" || usr_msg1 == "quit" || usr_msg1 == "q") 
 		{
 			encrypt(head, "keylist.dat", sha256_key, master_key);
 			break;
