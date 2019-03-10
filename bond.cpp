@@ -10,15 +10,14 @@
 #include <iomanip>	//Convenient spacing
 #include <cstring>	//Manipulate c-strings
 
-// #include <openssl/ssl.h>
-// #include <openssl/rsa.h>
-#include "openssl/sha.h"
+#include <openssl/ssl.h>
+#include <openssl/rsa.h>
 #include <openssl/sha.h>
 
 #include "pass_gen/pass_gen.hpp"
 #include "key_encryption/encrypt.h"
 #include "pass_read/pass_read.hpp"
-#include "sha256/sha256.hpp"
+// #include "sha256/sha256.hpp"
 
 #define bold_on		"\033[1m"
 #define bold_off	"\033[22m"
@@ -174,7 +173,7 @@ decrypt(struct binary_reg **head, struct binary_reg **tail,
 }
 
 std::string 
-sha256v2(const std::string str)
+sha256(const std::string str)
 {
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256_CTX sha256;
@@ -229,7 +228,6 @@ main(int argc, char *argv[])
 
 				std::cout	<< "code is:   " << master_key << std::endl
 							<< "sha256 is: " << sha256_key_c << std::endl
-							<< "2sha256 is:" << sha256v2(master_key) << std::endl
 							<< "Correct password you have unlocked the vault !"
 							<< std::endl << std::endl;
 				break;

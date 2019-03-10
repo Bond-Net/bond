@@ -1,8 +1,15 @@
+COMPILER=g++
+OPENSSLF=-lssl -lcrypto
+STDVERSN=-std=c++11
+FILENAME=-o bond
+FILEDIRC=bond.cpp pass_read/pass_read.cpp
+
 all:
 	clear
+	$(info cleared terminal) $(info)
 
-	g++ -lssl -lcrypto -std=c++11 -o bond bond.cpp pass_read/pass_read.cpp sha256/sha256.cpp 
-
+	$(COMPILER) $(FILENAME) $(FILEDIRC) $(OPENSSLF) $(STDVERSN)
+	
 	./bond 
 	
 clean:
