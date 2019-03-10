@@ -10,6 +10,9 @@
 #include <iomanip>	//Convenient spacing
 #include <cstring>	//Manipulate c-strings
 
+// #include <openssl/ssl.h>
+// #include <openssl/rsa.h>
+
 #include "pass_gen/pass_gen.hpp"
 #include "key_encryption/encrypt.h"
 #include "pass_read/pass_read.hpp"
@@ -132,7 +135,8 @@ encrypt(struct binary_reg *head, std::string name, std::string sha256_key, std::
 }
 
 void
-decrypt(struct binary_reg **head, struct binary_reg **tail, std::string master_key, FILE *file_db)
+decrypt(struct binary_reg **head, struct binary_reg **tail,
+	std::string master_key, FILE *file_db)
 {
 	std::string
 		msg;
@@ -170,22 +174,12 @@ int
 main(int argc, char *argv[])
 {
 	std::string
-		msg,
-		usr_msg1,
-		usr_msg2,
-		usr_msg3,
-	  usr_msg4,
-		master_key,
-		sha256_key;
+		msg, usr_msg1, usr_msg2, usr_msg3, usr_msg4, master_key, sha256_key;
 	char
 		sha256_key_c[64];
 	struct binary_reg
-		*head = NULL,
-		*tail = NULL,
-		*reader = NULL,
-		*prev = NULL,
-		*row_from_db_prev = NULL,
-		*row_from_db = NULL;
+		*head = NULL, *tail = NULL, *reader = NULL, *prev = NULL,
+		*row_from_db_prev = NULL, *row_from_db = NULL;
 	int
 		not_gone_through = 1;
 	FILE
@@ -325,8 +319,9 @@ main(int argc, char *argv[])
 				}
 				else
 				{
-					cout << "\n" bold_on "enter <identity> <username> of the password you want to delete: " bold_off;
-					cin >> usr_msg2 >> usr_msg3;
+					cout	<< "\n" bold_on "enter <identity> <username> of the "
+							<<"password you want to delete: " bold_off;
+					cin		>> usr_msg2 >> usr_msg3;
 
 					reader = head;
 					prev = NULL;
