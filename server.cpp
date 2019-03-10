@@ -1,6 +1,6 @@
 /*
- [Title]: server.c -- calculate the one way delays of the other VMs
- [Author]: Dimitris Mavrommatis (mavromat@ics.forth.gr) -- @inspire_forth
+ [Title]: server.cpp -- calculate the one way delays of the other VMs
+ [Author]:Ioannis Tsiakkas (iantsiakkas@ics.forth.gr) -- @inspire_forth
 -------------------------------------------------------------------------------------------------------------
  [Details]: 
  A C program that connects to other VMs and requests for timestamps in order to calculate the one way delay.
@@ -27,19 +27,21 @@
 #include <pthread.h>
 #include <unistd.h>
 
-char *serverName;
-double *delays;
+#define exit_err(FILE, LINE, ERR) \
+{ \
+    fprintf(stderr, a_c_r "ERROR: %-70s" a_c_re " | [%-50s, %-5d]\n", ERR, FILE, LINE); \
+    exit(EXIT_FAILURE); \
+}
 
-typedef double elem_type ;
+#define prnt_scs(FILE, LINE, MSG) \
+{ \
+    fprintf(stdout, "SUCCS: " a_c_g "%-70s" a_c_re " | [%-50s, %-5d]\n", MSG, FILE, LINE); \
+}
 
-typedef struct ip_name
-{
-    char *name;
-    char *ip;
-    int id;
-} ipname;
-
-#define ELEM_SWAP(a,b) { register elem_type t=(a);(a)=(b);(b)=t; }
+#define prnt_inf(FILE, LINE, MSG) \
+{ \
+    fprintf(stdout, "MESSG: " a_c_y "%-70s" a_c_re " | [%-50s, %-5d]\n", MSG, FILE, LINE); \
+}
 
 // server class for sending data
 class server
@@ -49,13 +51,57 @@ class server
         const void *buffer; 
         size_t length;
         int flags;
-        
+
     public:
         int get_socket() { return socket; }
         const void *get_buffer() { return buffer; } 
         size_t get_length() { return length; }
         int get_flags() { return flags; }
 
+    bool
+    create_socket()
+    {
+
+    }
+    
+    bool
+    file_to_server(char* flnm, SOCKET sckt)
+    {
+        Packet p;
+        p.header = 1;
+        p.footer = 0;
+        int test;
+
+        // Open
+        cout << "Opening the file for Reading...\n";
+        ifstream is (flnm, ios::in | ios::binary);
+
+        // Check if error
+        if ( !is )  {
+            cout << "Error opening the file to read :/\n";
+            return 0;
+        }
+
+        // Read and Write entire contents
+        while ( is ) {
+            // Read
+            is.read(p.buffer, BUFFER_SIZE);
+            //cout << "\nInput file pointer at: " << is.tellg() << "\nAmount read: " << is.gcount();
+            
+            // eof + last packet
+            if (is.gcount() < BUFFER_SIZE)
+                p.footer = is.gcount(); 
+            
+            test = send(sckt,(char*)&p,sizeof(Packet),0);
+            //cout << test << endl;
+            
+        }
+
+        // Close stuff
+        cout << "closing read file.\n";
+        is.close();
+        return 1;
+    }
 }
 
 // client class for recieving data
@@ -72,5 +118,4 @@ class client
         const void *get_buffer() { return buffer; } 
         size_t get_length() { return length; }
         int get_flags() { return flags; }
-
 }
