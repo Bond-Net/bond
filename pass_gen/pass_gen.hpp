@@ -118,6 +118,8 @@ pass_gen::printPass(bool outMeta)
 		std::cout << "\n";
 		return password;
 	}
+
+	return "";
 }
 
 void pass_gen::printMeta()
