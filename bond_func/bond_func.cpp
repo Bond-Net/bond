@@ -5,9 +5,9 @@
 
 typedef struct binary_reg
 {
-	char identity[32];
-	char username[32];
-	char password[32];
+	std::string identity;
+	std::string username;
+	std::string password;
 
 	struct binary_reg *next;
 	struct binary_reg *prev;
@@ -19,17 +19,17 @@ change(struct binary_reg *a, struct binary_reg *b)
 {
 	struct binary_reg temp;
 
-	strcpy (temp.identity, a->identity);
-	strcpy (temp.username, a->username);
-	strcpy (temp.password, a->password);
+	temp.identity = a->identity;
+	temp.username = a->username;
+	temp.password = a->password;
 
-	strcpy (a->identity, b->identity);
-	strcpy (a->username, b->username);
-	strcpy (a->password, b->password);
+	a->identity = b->identity;
+	a->username = b->username;
+	a->password = b->password;
 
-	strcpy (b->identity, temp.identity);
-	strcpy (b->username, temp.username);
-	strcpy (b->password, temp.password);
+	b->identity = temp.identity;
+	b->username = temp.username;
+	b->password = temp.password;
 }
 
 void
@@ -48,7 +48,7 @@ check(struct binary_reg *start)
 
 		while (current->next != next_one)
 		{
-			if (strcmp(current->identity, current->next->identity) > 0)
+			if (current->identity > current->next->identity)
 			{
 				change(current, current->next);
 				swapped = 1;
@@ -70,32 +70,13 @@ sort(struct binary_reg *head)
 bool
 insert(struct binary_reg *head, struct binary_reg *tail)
 {
-	std::string usr_msg2, usr_msg3, usr_msg4;
+	tail->next = new binary_reg();
 
-	std::cout << "\n" bold_on_2 "enter <new identity> <new username> <new password>: " bold_re_2 ;
-			std::cin >> usr_msg2 >> usr_msg3 >> usr_msg4;
+	std::cout << "\n" bold_on_2 "enter <new identity> <new username> <new password>: " bold_re_2;
+	std::cin >> tail->next->identity >> tail->next->username >> tail->next->password;
 
-	if(head == NULL)
-	{
-		head = (binary_reg *) malloc (sizeof(struct binary_reg));
-
-		strcpy(head->identity, usr_msg2.c_str());
-		strcpy(head->username, usr_msg3.c_str());
-		strcpy(head->password, usr_msg4.c_str());
-		
-		tail = head;
-	}
-	else
-	{
-		tail->next = (binary_reg *) malloc (sizeof(struct binary_reg));
-		tail->next->next = NULL;
-
-		strcpy(tail->next->identity, usr_msg2.c_str());
-		strcpy(tail->next->username, usr_msg3.c_str());
-		strcpy(tail->next->password, usr_msg4.c_str());
-		
-		tail = tail->next;
-	}
+	tail->next->next = NULL;
+	tail = tail->next;
 }
 
 bool
@@ -118,8 +99,7 @@ delete_pass(struct binary_reg *head, struct binary_reg *tail)
 
 		while(reader != NULL)
 		{
-			if((strcmp(reader->identity, usr_msg2.c_str()) +
-				strcmp(reader->username, usr_msg3.c_str())) == 0)
+			if(reader->identity == usr_msg2 && reader->username == usr_msg3)
 			{
 				if(prev == NULL)
 				{
@@ -161,7 +141,7 @@ list_all(struct binary_reg *head)
 		{
 			printf(
 				"identity: %-20s username: %-20s password: %-20s\n",
-				reader->identity ,reader->username ,reader->password
+				reader->identity.c_str(), reader->username.c_str(), reader->password.c_str()
 			);
 
 			reader = reader->next;
@@ -186,12 +166,12 @@ list_from(struct binary_reg *head)
 		struct binary_reg *reader = head;
 		while(reader != NULL)
 		{
-			if(!strcmp(reader->identity, usr_msg2.c_str()))
+			if(reader->identity != usr_msg2)
 			{
 				printf
 				(
 					"identity: %-20s username: %-20s password: %-20s\n",
-					reader->identity ,reader->username ,reader->password
+					reader->identity.c_str(), reader->username.c_str(), reader->password.c_str()
 				);
 			}
 			reader = reader->next;
@@ -216,10 +196,10 @@ edit(struct binary_reg *head)
 		struct binary_reg *reader = head;
 		while(reader != NULL)
 		{
-			if((strcmp(reader->identity, usr_msg2.c_str()) +
-				strcmp(reader->username, usr_msg3.c_str())) == 0)
+			if(reader->identity == usr_msg2 &&
+				reader->username == usr_msg3)
 			{
-				strcpy(reader->password, usr_msg4.c_str());
+				reader->password = usr_msg4;
 				break;
 			}
 

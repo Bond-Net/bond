@@ -47,6 +47,10 @@ list_encrypt(struct binary_reg *head, std::string name,
 		// strcpy(reader->username, encrypt(msg=reader->username, master_key).c_str());
 		// strcpy(reader->password, encrypt(msg=reader->password, master_key).c_str());
 
+		// strcpy(reader->identity, aes_encrypt(key, iv, &reader->identity));
+		// strcpy(reader->username, aes_encrypt(key, iv, &reader->username));
+		// strcpy(reader->password, aes_encrypt(key, iv, &reader->password));
+
 		fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
 		reader = reader->next;
 	}

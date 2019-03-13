@@ -143,6 +143,14 @@ main(int argc, char *argv[])
 		}
 		else if(usr_msg1 == "insert")
 		{
+			if(head == NULL)
+			{
+				head = new binary_reg();
+				head->identity = "GUARD";
+				head->username = "GUARD";
+				head->password = "GUARD";
+				tail = head;
+			}
 			insert(head, tail);
 		}
 		else if(usr_msg1 == "delete-pass")

@@ -16,11 +16,11 @@ gen_params(byte key[KEY_SIZE], byte iv[BLOCK_SIZE], std::string ppass)
 	std::cout << "iv: " << iv << "\n";
 }
 
-secure_string
+std::string
 aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE],
-	const secure_string& ptext)
+	const std::string& ptext)
 {
-	secure_string ctext;
+	std::string ctext;
 
 	EVP_CIPHER_CTX_free_ptr ctx(EVP_CIPHER_CTX_new(), ::EVP_CIPHER_CTX_free);
 	int rc = EVP_EncryptInit_ex(ctx.get(), EVP_aes_256_cbc(), NULL, key, iv);
@@ -47,11 +47,11 @@ aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE],
 	return ctext;
 }
 
-secure_string
+std::string
 aes_decrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE],
-	const secure_string& ctext)
+	const std::string& ctext)
 {
-	secure_string rtext;
+	std::string rtext;
 
 	EVP_CIPHER_CTX_free_ptr ctx(EVP_CIPHER_CTX_new(), ::EVP_CIPHER_CTX_free);
 	int rc = EVP_DecryptInit_ex(ctx.get(), EVP_aes_256_cbc(), NULL, key, iv);

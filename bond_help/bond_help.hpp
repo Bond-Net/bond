@@ -34,13 +34,11 @@
 		std::string(MSG).c_str(), __FILE__, __LINE__); \
 }
 
-typedef
-struct
-binary_reg
+typedef struct binary_reg
 {
-	char identity[32];
-	char username[32];
-	char password[32];
+	std::string identity;
+	std::string username;
+	std::string password;
 
 	struct binary_reg *next;
 	struct binary_reg *prev;

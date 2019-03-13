@@ -81,9 +81,9 @@ using EVP_CIPHER_CTX_free_ptr = std::unique_ptr<EVP_CIPHER_CTX, decltype(&::EVP_
 
 void
 gen_params(byte key[KEY_SIZE], byte iv[BLOCK_SIZE], std::string ppass);
-secure_string
-aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], const secure_string& ptext);
-secure_string
-aes_decrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], const secure_string& ctext);
+std::string
+aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], const std::string& ptext);
+std::string
+aes_decrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], const std::string& ctext);
 
 #endif // DFS_SSL_CRYPTER_H
