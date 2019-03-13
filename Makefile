@@ -2,7 +2,14 @@ COMPILER=g++
 OPENSSLF=-lssl -lcrypto
 STDVERSN=-std=c++11
 FILENAME=-o bond
-FILEDIRC=bond.cpp pass_read/pass_read.cpp
+
+BONDMAIN=bond.cpp
+BONDFUNC=bond_func/bond_func.cpp
+BONDHELP=bond_help/bond_help.cpp
+CRYPTSSL=crypt_ssl/crypt_ssl.cpp
+PASSREAD=pass_read/pass_read.cpp
+
+FILEDIRC=$(BONDMAIN) $(BONDFUNC) $(BONDHELP) $(PASSREAD) $(CRYPTSSL)
 
 all:
 	clear
@@ -10,7 +17,7 @@ all:
 
 	$(COMPILER) $(FILENAME) $(FILEDIRC) $(OPENSSLF) $(STDVERSN)
 	
-	./bond 
+	./bond --f keylist.dat
 	
 clean:
 	bond

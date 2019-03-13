@@ -1,5 +1,6 @@
 #ifndef _pass_gen_H_
 #define _pass_gen_H_
+
 #include <iostream> //Input-output
 #include <random> //PRNG stuff
 #include <algorithm> //Transform function

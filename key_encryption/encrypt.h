@@ -1,3 +1,6 @@
+#ifndef ENCRYPT_KAKOS_H
+#define ENCRYPT_KAKOS_H
+
 #include "b64.h"
 #include "vigenere.h"
 
@@ -19,3 +22,5 @@ decrypt(std::string& encrypted_msg, std::string& key)
 	std::string b64_decode_str = base64_decode(b64_encoded_str);
 	return b64_decode_str;
 }
+
+#endif

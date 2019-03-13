@@ -12,205 +12,42 @@
 
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
+#include <openssl/aes.h>
 #include <openssl/sha.h>
 
-#include "pass_gen/pass_gen.hpp"
-#include "key_encryption/encrypt.h"
+#include "bond_func/bond_func.hpp"
+#include "bond_help/bond_help.hpp"
+#include "crypt_ssl/crypt_ssl.hpp"
 #include "pass_read/pass_read.hpp"
-// #include "sha256/sha256.hpp"
 
-#define bold_on		"\033[1m"
-#define bold_off	"\033[22m"
 
-inline bool
-file_exists(const std::string& name)
-{
-	struct stat buffer;
-	return (stat (name.c_str(), &buffer) == 0);
-}
 
-struct
-binary_reg
-{
-	char identity[32];
-	char username[32];
-	char password[32];
 
-	struct binary_reg *next;
-};
 
-void
-change(struct binary_reg *a, struct binary_reg *b)
-{
-	struct binary_reg temp;
 
-	strcpy (temp.identity, a->identity);
-	strcpy (temp.username, a->username);
-	strcpy (temp.password, a->password);
 
-	strcpy (a->identity, b->identity);
-	strcpy (a->username, b->username);
-	strcpy (a->password, b->password);
 
-	strcpy (b->identity, temp.identity);
-	strcpy (b->username, temp.username);
-	strcpy (b->password, temp.password);
-}
-
-void
-check(struct binary_reg *start)
-{
-	int
-		swapped;
-	struct binary_reg
-		*current = NULL,
-		*next_one = NULL;
-
-	do
-	{
-		swapped = 0;
-		current = start;
-
-		while (current->next != next_one)
-		{
-			if (strcmp(current->identity, current->next->identity) > 0)
-			{
-				change(current, current->next);
-				swapped = 1;
-			}
-			current = current->next;
-		}
-		next_one = current;
-	}
-	while (swapped);
-}
-
-void
-sort(struct binary_reg *head)
-{
-	struct binary_reg *reader = head;
-	check(reader);
-}
-
-FILE *
-file_open(std::string file, std::string type)
-{
-	FILE *file_db = fopen(file.c_str(), type.c_str());
-	if(file_db == NULL)
-	{
-		printf("Error opening keylist.dat\n");
-		exit(1);
-	}
-	return file_db;
-}
-
-void
-encrypt(struct binary_reg *head, std::string name,
-	std::string sha256_key, std::string master_key)
-{
-	if(head == NULL) return;
-
-	std::string
-		msg;
-	struct binary_reg
-		*reader = head;
-	FILE
-		*new_file_db = file_open("new_keylist.dat", "w");
-
-	fwrite(sha256_key.c_str(), sizeof(char) * 70, 1, new_file_db);
-
-	while(reader != NULL)
-	{
-		//decrypt
-		strcpy(reader->identity, encrypt(msg=reader->identity, master_key).c_str());
-		strcpy(reader->username, encrypt(msg=reader->username, master_key).c_str());
-		strcpy(reader->password, encrypt(msg=reader->password, master_key).c_str());
-
-		fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
-		reader = reader->next;
-	}
-
-	fclose(new_file_db);
-
-	remove(name.c_str());
-	rename("new_keylist.dat", name.c_str());
-}
-
-void
-decrypt(struct binary_reg **head, struct binary_reg **tail,
-	std::string master_key, FILE *file_db)
-{
-	std::string
-		msg;
-	struct binary_reg
-		*row_from_db_prev = NULL,
-		*row_from_db = NULL;
-	int
-		not_gone_through = 1;
-
-	row_from_db = (binary_reg *) malloc (sizeof(struct binary_reg));
-
-	*head = row_from_db;
-	*tail = row_from_db;
-
-	while (fread(row_from_db, sizeof(struct binary_reg), 1, file_db) != 0)
-	{
-		//decrypt
-		strcpy(row_from_db->identity, decrypt(msg=row_from_db->identity, master_key).c_str());
-		strcpy(row_from_db->username, decrypt(msg=row_from_db->username, master_key).c_str());
-		strcpy(row_from_db->password, decrypt(msg=row_from_db->password, master_key).c_str());
-		
-		row_from_db->next = (binary_reg *) malloc (sizeof(struct binary_reg));
-		row_from_db_prev = row_from_db;
-		row_from_db = row_from_db->next;
-
-		not_gone_through = 0;
-	}
-	*tail = row_from_db_prev;
-	
-	if(not_gone_through) *head = NULL;
-	else row_from_db_prev->next = NULL;
-}
-
-std::string 
-sha256(const std::string str)
-{
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, str.c_str(), str.size());
-    SHA256_Final(hash, &sha256);
-    stringstream ss;
-    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-    {
-        ss << hex << setw(2) << setfill('0') << (int) hash[i];
-    }
-    return ss.str();
-}
 
 int
 main(int argc, char *argv[])
 {
-	std::string
-		msg, usr_msg1, usr_msg2, usr_msg3, usr_msg4, master_key, sha256_key;
-	char
-		sha256_key_c[64];
-	struct binary_reg
-		*head = NULL, *tail = NULL, *reader = NULL, *prev = NULL,
+	std::string msg, usr_msg1, usr_msg2, usr_msg3, usr_msg4, master_key,
+		sha256_key, filename;
+	char sha256_key_c[64];
+	struct binary_reg *head = NULL, *tail = NULL, *reader = NULL, *prev = NULL,
 		*row_from_db_prev = NULL, *row_from_db = NULL;
-	int
-		not_gone_through = 1;
-	FILE
-		*file_db;
-	std::vector
-		<std::string> tokens;
+	int not_gone_through = 1;
+	bool verbose = false;
+	FILE *file_db;
 
-	if(file_exists("keylist.dat"))
+	arg_int(argc, argv, &filename, &verbose);
+
+	if(file_exists(filename))
 	{
 		std::cout	<< "Enter the master key in order to open the vault: "
 					<< std::endl << std::endl;
 
-		file_db = file_open("keylist.dat", "r");
+		file_db = file_open(filename, "r");
 		if(fread(sha256_key_c, sizeof(char) * 70, 1, file_db) != 0)
 		{
 			sha256_key = sha256_key_c;
@@ -222,7 +59,7 @@ main(int argc, char *argv[])
 				if(sha256(master_key = getpass()) != sha256_key)
 				{
 					std::cout	<< bold_on << "incorrect password, try again"
-								<< bold_off<< std::endl << std::endl;
+								<< bold_re << std::endl << std::endl;
 					continue;
 				}
 
@@ -234,7 +71,7 @@ main(int argc, char *argv[])
 			}
 		}
 
-		decrypt(&head, &tail, master_key, file_db);
+		list_decrypt(&head, &tail, master_key, file_db);
 
 		fclose(file_db);
 	}
@@ -252,11 +89,11 @@ main(int argc, char *argv[])
 			if(sha256(getpass()) != sha256_key)
 			{
 				std::cout	<< bold_on << "(your passwords did not match, please retry)"
-							<< bold_off<< std::endl << std::endl;
+							<< bold_re  << std::endl << std::endl;
 				continue;
 			}
 
-			file_db = fopen("keylist.dat", "ab");
+			file_db = fopen(filename.c_str(), "ab");
 			if(file_db == NULL)
 			{
 				printf("Error opening keylist.dat\n");
@@ -272,219 +109,100 @@ main(int argc, char *argv[])
 
 	while(true)
 	{
-		cout << "\n" bold_on "command: " bold_off;
-		cin >> usr_msg1;
+		std::cout << "\n" bold_on "command: " bold_re ;
+		std::cin >> usr_msg1;
 
-		if(usr_msg1 == "exit" || usr_msg1 == "quit" || usr_msg1 == "q") 
+		if(usr_msg1 == "exit" || usr_msg1 == "quit" || usr_msg1 == "q")
 		{
-			encrypt(head, "keylist.dat", sha256_key, master_key);
+			list_encrypt(head, filename, sha256_key, master_key);
 			break;
 		}
 		else if(usr_msg1 == "reset")
 		{
-			if(file_exists("keylist.dat"))
+			if(file_exists(filename))
 			{
-				FILE *file_db = file_open("keylist.dat", "wb");
+				FILE *file_db = file_open(filename, "wb");
 				fwrite(sha256_key_c, sizeof(char) * 70, 1, file_db);
 				fclose(file_db);
 			}
 			else
 			{
-				cout << "you do not have a key list" << std::endl;
+				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
 		else if(usr_msg1 == "delete-file")
 		{
-			// deleting the file
-			remove("keylist.dat");
-			head= NULL;
-			tail = NULL;
+			if(file_exists(filename))
+			{
+				remove(filename.c_str());
+				head = NULL;
+				tail = NULL;
+			}
 		}
 		else if(usr_msg1 == "insert")
 		{
-			cout << "\n" bold_on "enter <new identity> <new username> <new password>: " bold_off;
-			cin >> usr_msg2 >> usr_msg3 >> usr_msg4;
-
-			if(head == NULL)
-			{
-				head = (binary_reg *) malloc (sizeof(struct binary_reg));
-
-				strcpy(head->identity, usr_msg2.c_str());
-				strcpy(head->username, usr_msg3.c_str());
-				strcpy(head->password, usr_msg4.c_str());
-				
-				tail = head;
-			}
-			else
-			{
-				tail->next = (binary_reg *) malloc (sizeof(struct binary_reg));
-				tail->next->next = NULL;
-
-				strcpy(tail->next->identity, usr_msg2.c_str());
-				strcpy(tail->next->username, usr_msg3.c_str());
-				strcpy(tail->next->password, usr_msg4.c_str());
-				
-				tail = tail->next;
-			}
+			insert(head, tail);
 		}
 		else if(usr_msg1 == "delete-pass")
 		{
-			if(file_exists("keylist.dat"))
+			if(file_exists(filename))
 			{
-				if(head == NULL)
-				{
-					cout << "your key list is empty" << std::endl;
-				}
-				else
-				{
-					cout	<< "\n" bold_on "enter <identity> <username> of the "
-							<<"password you want to delete: " bold_off;
-					cin		>> usr_msg2 >> usr_msg3;
-
-					reader = head;
-					prev = NULL;
-					while(reader != NULL)
-					{
-						if((strcmp(reader->identity, usr_msg2.c_str()) +
-							strcmp(reader->username, usr_msg3.c_str())) == 0)
-						{
-							if(prev == NULL)
-							{
-								head = head->next;
-							}
-							else if(reader->next != NULL)
-							{
-								prev->next = reader->next;
-							}
-							else
-							{
-								prev->next = NULL;
-								tail = prev;
-							}
-
-							free(reader);
-							break;
-						}
-
-						prev = reader;
-						reader = reader->next;
-					}
-
-					if(reader == NULL) cout << "Did not find entry" << std::endl;
-				}
+				delete_pass(head, tail);
 			}
 			else
 			{
-				cout << "you do not have a key list" << std::endl;
+				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
 		else if(usr_msg1 == "list-all")
 		{
-			if(file_exists("keylist.dat"))
+			if(file_exists(filename))
 			{
-				if(head == NULL)
-				{
-					cout << "your key list is empty" << std::endl;
-				}
-				else
-				{
-					reader = head;
-					while(reader != NULL)
-					{
-						printf(
-							"identity: %-20s username: %-20s password: %-20s\n",
-							reader->identity ,reader->username ,reader->password
-						);
-
-						reader = reader->next;
-					}
-				}
+				list_all(head);
 			}
 			else
 			{
-				cout << "you do not have a key list" << std::endl;
+				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
 		else if(usr_msg1 == "list-from")
 		{
-			if(file_exists("keylist.dat"))
+			if(file_exists(filename))
 			{
-				if(head == NULL)
-				{
-					cout << "your key list is empty" << std::endl;
-				}
-				else
-				{
-					cout << "\n" bold_on "enter <identity> you want to see credentials: " bold_off;
-					cin >> usr_msg2;
-
-					reader = head;
-					while(reader != NULL)
-					{
-						if(!strcmp(reader->identity, usr_msg2.c_str()))
-						{
-							printf(
-								"identity: %-20s username: %-20s password: %-20s\n",
-								reader->identity ,reader->username ,reader->password
-							);
-						}
-						reader = reader->next;
-					}
-				}
+				list_from(head);
 			}
 			else
 			{
-				cout << "you do not have a key list" << std::endl;
+				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
 		else if(usr_msg1 == "edit")
 		{
-			if(file_exists("keylist.dat"))
+			if(file_exists(filename))
 			{
-				if(head == NULL)
-				{
-					cout << "your key list is empty" << std::endl;
-				}
-				else
-				{
-					cout << "\n" bold_on "enter <identity> <username> <new password> you want to edit: " bold_off;
-					cin >> usr_msg2 >> usr_msg3 >> usr_msg4;
-
-					reader = head;
-					while(reader != NULL)
-					{
-						if((strcmp(reader->identity, usr_msg2.c_str()) +
-							strcmp(reader->username, usr_msg3.c_str())) == 0)
-						{
-							strcpy(reader->password, usr_msg4.c_str());
-							break;
-						}
-
-						reader = reader->next;
-					}
-				}
+				edit(head);
 			}
 			else
 			{
-				cout << "you do not have a key list" << std::endl;
+				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
 		else if(usr_msg1 == "sort")
 		{
 			if(head == NULL)
 			{
-				cout << "your key list is empty" << std::endl;
+				std::cout << "your key list is empty" << std::endl;
 			}
 			else
 			{
-				if(file_exists("keylist.dat"))
+				if(file_exists(filename))
 				{
 					reader = head;
 					sort(reader);
 				}
 				else
 				{
-					cout << "you do not have a key list" << std::endl;
+					std::cout << "you do not have a key list" << std::endl;
 				}
 			}
 		}

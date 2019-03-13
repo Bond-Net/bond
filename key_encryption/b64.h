@@ -1,3 +1,6 @@
+#ifndef BASE64_KAKOS_H
+#define BASE64_KAKOS_H
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -45,3 +48,5 @@ static std::string base64_decode(const std::string &in) {
     }
     return out;
 }
+
+#endif
