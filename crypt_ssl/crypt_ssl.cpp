@@ -27,7 +27,18 @@ list_encrypt(struct binary_reg *head, std::string name,
 	struct binary_reg *reader = head;
 	FILE *new_file_db = file_open("new_keylist.dat", "w");
 
+	// every keyvault begins with the hash of the code
 	fwrite(sha256_key.c_str(), sizeof(char) * 70, 1, new_file_db);
+
+	// Load the necessary cipher
+	EVP_add_cipher(EVP_aes_256_cbc());
+
+	// plaintext, ciphertext, recovered text
+	secure_string ptext = "Now is the time for all good men to come to the aide of their country";
+	secure_string ctext, rtext;
+
+	byte key[KEY_SIZE], iv[BLOCK_SIZE];
+	gen_params(key, iv, "master_key");
 
 	while(reader != NULL)
 	{

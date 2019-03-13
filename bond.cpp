@@ -31,11 +31,13 @@
 int
 main(int argc, char *argv[])
 {
-	std::string msg, usr_msg1, usr_msg2, usr_msg3, usr_msg4, master_key,
-		sha256_key, filename;
+	std::string msg, usr_msg1, usr_msg2, usr_msg3, usr_msg4, filename;
+	std::string master_key, sha256_key;
+
 	char sha256_key_c[64];
-	struct binary_reg *head = NULL, *tail = NULL, *reader = NULL, *prev = NULL,
-		*row_from_db_prev = NULL, *row_from_db = NULL;
+	struct binary_reg *head = NULL, *tail = NULL, *reader = NULL, 
+		*prev = NULL, *row_from_db_prev = NULL, *row_from_db = NULL;
+
 	int not_gone_through = 1;
 	bool verbose = false;
 	FILE *file_db;

@@ -14,12 +14,7 @@
 #include <cstring>		//Manipulate c-strings
 #include <sstream>
 
-#include <openssl/ssl.h>
-#include <openssl/rsa.h>
-#include <openssl/aes.h>
-#include <openssl/sha.h>
-
-#include "../key_encryption/aes_encrypt.hpp"
+#include "../crypt_ssl/aes_encrypt.hpp"
 #include "../bond_help/bond_help.hpp"
 
 std::string
