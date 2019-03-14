@@ -26,6 +26,6 @@ list_encrypt(struct binary_reg *head, std::string name,
 
 void
 list_decrypt(struct binary_reg **head, struct binary_reg **tail,
-	std::string master_key, FILE *file_db);
+	std::string master_key, std::ifstream *file_db);
 
 #endif // CRYPT_SSL_H

@@ -1,5 +1,14 @@
 #include "crypt_ssl.hpp"
 #include <openssl/sha.h>
+#include <fstream>
+
+typedef struct binary_reg_char
+{
+	char identity[96];
+	char username[96];
+	char password[96];
+}
+binary_reg_char;
 
 std::string
 sha256(const std::string str)
@@ -23,39 +32,45 @@ list_encrypt(struct binary_reg *head, std::string name,
 {
 	if(head == NULL) return;
 
-	std::string msg;
 	struct binary_reg *reader = head;
-	FILE *new_file_db = file_open("new_keylist.dat", "w");
+	std::ofstream new_file_db("new_keylist.dat", std::ios::binary);
 
 	// every keyvault begins with the hash of the code
-	fwrite(sha256_key.c_str(), sizeof(char) * 70, 1, new_file_db);
+	new_file_db.write(sha256_key.c_str(), sizeof(char) * 96);
 
-	// Load the necessary cipher
-	EVP_add_cipher(EVP_aes_256_cbc());
+	// // Load the necessary cipher
+	// EVP_add_cipher(EVP_aes_256_cbc());
 
-	// plaintext, ciphertext, recovered text
-	secure_string ptext = "Now is the time for all good men to come to the aide of their country";
-	secure_string ctext, rtext;
+	// // plaintext, ciphertext, recovered text
+	// secure_string ptext = "Now is the time for all good men to come to the aide of their country";
+	// secure_string ctext, rtext;
 
-	byte key[KEY_SIZE], iv[BLOCK_SIZE];
-	gen_params(key, iv, "master_key");
+	// byte key[KEY_SIZE], iv[BLOCK_SIZE];
+	// gen_params(key, iv, "master_key");
+
+	binary_reg_char *new_entry = (binary_reg_char *) malloc (sizeof(binary_reg_char));
 
 	while(reader != NULL)
 	{
-		//decrypt
+		// decrypt
 		// strcpy(reader->identity, encrypt(msg=reader->identity, master_key).c_str());
 		// strcpy(reader->username, encrypt(msg=reader->username, master_key).c_str());
 		// strcpy(reader->password, encrypt(msg=reader->password, master_key).c_str());
 
-		// strcpy(reader->identity, aes_encrypt(key, iv, &reader->identity));
-		// strcpy(reader->username, aes_encrypt(key, iv, &reader->username));
-		// strcpy(reader->password, aes_encrypt(key, iv, &reader->password));
+		// strcpy(reader->identity, aes_encrypt(key, iv, reader->identity));
+		// strcpy(reader->username, aes_encrypt(key, iv, reader->username));
+		// strcpy(reader->password, aes_encrypt(key, iv, reader->password));
 
-		fwrite(reader, sizeof(struct binary_reg), 1, new_file_db);
+		strcpy(new_entry->identity, reader->identity.c_str());
+		strcpy(new_entry->username, reader->username.c_str());
+		strcpy(new_entry->password, reader->password.c_str());
+
+		new_file_db.write((char*) new_entry, sizeof(binary_reg_char));
+
 		reader = reader->next;
 	}
 
-	fclose(new_file_db);
+	new_file_db.close();
 
 	remove(name.c_str());
 	rename("new_keylist.dat", name.c_str());
@@ -63,29 +78,31 @@ list_encrypt(struct binary_reg *head, std::string name,
 
 void
 list_decrypt(struct binary_reg **head, struct binary_reg **tail,
-	std::string master_key, FILE *file_db)
+	std::string master_key, std::ifstream *file_db)
 {
-	std::string
-		msg;
-	struct binary_reg
-		*row_from_db_prev = NULL,
-		*row_from_db = NULL;
-	int
-		not_gone_through = 1;
+	struct binary_reg *row_from_db_prev = NULL, *row_from_db = NULL;
+	int not_gone_through = 1;
 
-	row_from_db = (binary_reg *) malloc (sizeof(struct binary_reg));
+	row_from_db = new binary_reg();
+	binary_reg_char *new_entry = (binary_reg_char *) malloc (sizeof(binary_reg_char));
 
 	*head = row_from_db;
 	*tail = row_from_db;
 
-	while (fread(row_from_db, sizeof(struct binary_reg), 1, file_db) != 0)
+	while (file_db->read((char*) new_entry, sizeof(binary_reg_char)))
 	{
+		std::cout << "gamomano" << std::endl;
+
 		//decrypt
 		// strcpy(row_from_db->identity, decrypt(msg=row_from_db->identity, master_key).c_str());
 		// strcpy(row_from_db->username, decrypt(msg=row_from_db->username, master_key).c_str());
 		// strcpy(row_from_db->password, decrypt(msg=row_from_db->password, master_key).c_str());
-		
-		row_from_db->next = (binary_reg *) malloc (sizeof(struct binary_reg));
+
+		row_from_db->identity = new_entry->identity;
+		row_from_db->username = new_entry->username;
+		row_from_db->password = new_entry->password;
+
+		row_from_db->next = new binary_reg();
 		row_from_db_prev = row_from_db;
 		row_from_db = row_from_db->next;
 

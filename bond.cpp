@@ -40,7 +40,6 @@ main(int argc, char *argv[])
 
 	int not_gone_through = 1;
 	bool verbose = false;
-	FILE *file_db;
 
 	arg_int(argc, argv, &filename, &verbose);
 
@@ -49,9 +48,15 @@ main(int argc, char *argv[])
 		std::cout	<< "Enter the master key in order to open the vault: "
 					<< std::endl << std::endl;
 
-		file_db = file_open(filename, "r");
-		if(fread(sha256_key_c, sizeof(char) * 70, 1, file_db) != 0)
+		std::ifstream file_db(filename, std::ios::out | std::ios::binary);
+		if (!file_db.is_open())
 		{
+			std::cout << "failed to open " << filename << '\n';
+		}
+		else
+		{
+			file_db.read(reinterpret_cast<char *>(&sha256_key_c), sizeof(char) * 96);
+		
 			sha256_key = sha256_key_c;
 
 			while(true)
@@ -73,9 +78,9 @@ main(int argc, char *argv[])
 			}
 		}
 
-		list_decrypt(&head, &tail, master_key, file_db);
+		list_decrypt(&head, &tail, master_key, &file_db);
 
-		fclose(file_db);
+		file_db.close();
 	}
 	else
 	{
@@ -95,16 +100,10 @@ main(int argc, char *argv[])
 				continue;
 			}
 
-			file_db = fopen(filename.c_str(), "ab");
-			if(file_db == NULL)
-			{
-				printf("Error opening keylist.dat\n");
-				exit(1);
-			}
-			strcpy(sha256_key_c, sha256_key.c_str());
-			fwrite(sha256_key_c, sizeof(char) * 70, 1, file_db);
+			std::ofstream file_db(filename, std::ios::binary);
+			file_db.write(sha256_key.c_str(), sizeof(char) * 96);
+			file_db.close();
 
-			fclose(file_db);
 			break;
 		}
 	}
@@ -123,9 +122,9 @@ main(int argc, char *argv[])
 		{
 			if(file_exists(filename))
 			{
-				FILE *file_db = file_open(filename, "wb");
-				fwrite(sha256_key_c, sizeof(char) * 70, 1, file_db);
-				fclose(file_db);
+				std::ofstream file_db(filename, std::ios::binary);
+				file_db.write(sha256_key_c, sizeof(char) * 96);
+				file_db.close();
 			}
 			else
 			{
@@ -143,15 +142,7 @@ main(int argc, char *argv[])
 		}
 		else if(usr_msg1 == "insert")
 		{
-			if(head == NULL)
-			{
-				head = new binary_reg();
-				head->identity = "GUARD";
-				head->username = "GUARD";
-				head->password = "GUARD";
-				tail = head;
-			}
-			insert(head, tail);
+			insert(&head, &tail);
 		}
 		else if(usr_msg1 == "delete-pass")
 		{

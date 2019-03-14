@@ -68,15 +68,27 @@ sort(struct binary_reg *head)
 }
 
 bool
-insert(struct binary_reg *head, struct binary_reg *tail)
+insert(struct binary_reg **head, struct binary_reg **tail)
 {
-	tail->next = new binary_reg();
-
 	std::cout << "\n" bold_on_2 "enter <new identity> <new username> <new password>: " bold_re_2;
-	std::cin >> tail->next->identity >> tail->next->username >> tail->next->password;
 
-	tail->next->next = NULL;
-	tail = tail->next;
+	if((*head) == NULL)
+	{
+		(*head) = new binary_reg();
+
+		std::cin >> (*head)->identity >> (*head)->username >> (*head)->password;
+
+		(*tail) = (*head);
+	}
+	else
+	{
+		(*tail)->next = new binary_reg();
+		(*tail)->next->next = NULL;
+
+		std::cin >> (*tail)->next->identity >> (*tail)->next->username >> (*tail)->next->password;
+		
+		(*tail) = (*tail)->next;
+	}
 }
 
 bool

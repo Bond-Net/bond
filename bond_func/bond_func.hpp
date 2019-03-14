@@ -23,7 +23,7 @@ void
 sort(struct binary_reg *head);
 
 bool
-insert(struct binary_reg *head, struct binary_reg *tail);
+insert(struct binary_reg **head, struct binary_reg **tail);
 
 bool
 delete_pass(struct binary_reg *head, struct binary_reg *tail);
