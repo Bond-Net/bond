@@ -93,6 +93,7 @@ list_encrypt(struct binary_reg *head, std::string filename,
 
 	// OPENSSL_cleanse(key, KEY_SIZE);
 	// OPENSSL_cleanse(iv, BLOCK_SIZE);
+
 	key = (unsigned char *)"";
 	iv = (unsigned char *)"";
 
@@ -100,25 +101,6 @@ list_encrypt(struct binary_reg *head, std::string filename,
 
 	remove(filename.c_str());
 	rename("new_keylist.dat", filename.c_str());
-
-	//
-
-	struct binary_reg *headk = NULL, *tailk = NULL;
-	std::ifstream file_db(filename, std::ios::in | std::ios::binary);
-	if (!file_db.is_open())
-	{
-		std::cout << "failed to open " << filename << '\n';
-	}
-	else
-	{
-		char sha256_key_c[96];
-		file_db.read((char*) &sha256_key_c, sizeof(char) * 96);
-		list_decrypt(&headk, &tailk, master_key, &file_db);
-	}
-
-	file_db.close();
-
-	//
 }
 
 void
@@ -169,10 +151,10 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 
 		gone = true;
 	}
-	printf("[%s/%d]\n", __FILE__, __LINE__);
 
 	// OPENSSL_cleanse(key, KEY_SIZE);
 	// OPENSSL_cleanse(iv, BLOCK_SIZE);
+
 	key = (unsigned char *)"";
 	iv = (unsigned char *)"";
 
