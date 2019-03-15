@@ -18,18 +18,6 @@ sha256(const std::string str)
 	return ss.str();
 }
 
-void
-pri(std::string stringer)
-{
-	std::cout << "HASH: ";
-	for(int i = 0; i < stringer.length(); i++)
-	{
-		std::cout << stringer[i] << "|";
-	}
-	std::cout << std::endl;
-}
-
-
 struct file_io
 {
 	char identity[96];
@@ -71,15 +59,10 @@ list_encrypt(struct binary_reg *head, std::string filename,
 
 	while(reader != NULL)
 	{
-		// ENCRYPT DATA
-		c_identity = aes_encrypt(key, iv, reader->identity);
-		c_username = aes_encrypt(key, iv, reader->username);
-		c_password = aes_encrypt(key, iv, reader->password);
-
-		// COPY FROM STRING TO CHAR *
-		strcpy(entry.identity, c_identity.c_str());
-		strcpy(entry.username, c_username.c_str());
-		strcpy(entry.password, c_password.c_str());
+		// ENCRYPT
+		strcpy(entry.identity, aes_encrypt(key, iv, reader->identity).c_str());
+		strcpy(entry.username, aes_encrypt(key, iv, reader->username).c_str());
+		strcpy(entry.password, aes_encrypt(key, iv, reader->password).c_str());
 
 		// printf("ENCR| entry.identity: |%s|\n", entry.identity);
 		// printf("ENCR| entry.username: |%s|\n", entry.username);
@@ -131,19 +114,14 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 
 	while(read_file->read((char *) &entry, sizeof(struct file_io)))
 	{
-		// COPY FROM CHAR * TO STRING
-		reader->identity = entry.identity;
-		reader->username = entry.username;
-		reader->password = entry.password;
+		// DECRYPT
+		reader->identity = aes_decrypt(key, iv, std::string(entry.identity));
+		reader->username = aes_decrypt(key, iv, std::string(entry.username));
+		reader->password = aes_decrypt(key, iv, std::string(entry.password));
 
-		// DECRYPT DATA
-		reader->identity = aes_decrypt(key, iv, reader->identity);
-		reader->username = aes_decrypt(key, iv, reader->username);
-		reader->password = aes_decrypt(key, iv, reader->password);
-
-		std::cout << "DECR| reader->identity: |" << reader->identity << "|" << std::endl;
-		std::cout << "DECR| reader->username: |" << reader->username << "|" << std::endl;
-		std::cout << "DECR| reader->password: |" << reader->password << "|" << std::endl;
+		// std::cout << "DECR| reader->identity: |" << reader->identity << "|" << std::endl;
+		// std::cout << "DECR| reader->username: |" << reader->username << "|" << std::endl;
+		// std::cout << "DECR| reader->password: |" << reader->password << "|" << std::endl;
 
 		reader->next = new binary_reg();
 		reader_prev = reader;
@@ -165,49 +143,3 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 
 	printf("[%s/%d]\n", __FILE__, __LINE__);
 }
-
-
-// bool
-// encrypt_list(std::string old_file, std::string new_file, std::string master_key)
-// {
-// 	int bytes_read, bytes_written;
-// 	unsigned char indata[AES_BLOCK_SIZE];
-// 	unsigned char outdata[AES_BLOCK_SIZE];
-
-// 	/* ckey and ivec are the two 128-bits keys necesary to
-// 	en- and recrypt your data.  Note that ckey can be
-// 	192 or 256 bits as well */
-// 	unsigned char *ckey = (unsigned char *) malloc (sizeof(master_key.c_str()));
-// 	memcpy(ckey, master_key.c_str(), sizeof(master_key.c_str()));
-// 	unsigned char ivec[] = "dontusethisinput";
-
-// 	/* data structure that contains the key itself */
-// 	AES_KEY key;
-
-// 	 set the encryption key 
-// 	AES_set_encrypt_key(ckey, 128, &key);
-
-// 	/* set where on the 128 bit encrypted block to begin encryption*/
-// 	int num = 0;
-
-// 	FILE *old_f = file_open(old_file.c_str(), "r");
-// 	FILE *new_f = file_open("new_keylist.dat", "w");
-
-// 	while (1)
-// 	{
-// 		bytes_read = fread(indata, 1, AES_BLOCK_SIZE, old_f);
-
-// 		AES_cfb128_encrypt(indata, outdata, bytes_read, &key, ivec, &num,
-// 		AES_ENCRYPT);
-
-// 		bytes_written = fwrite(outdata, 1, bytes_read, new_f);
-// 		if (bytes_read < AES_BLOCK_SIZE)
-// 		break;
-// 	}
-
-// 	fclose(old_f);
-// 	fclose(new_f);
-
-// 	remove(new_file.c_str());
-// 	rename("new_keylist.dat", new_file.c_str());
-// }

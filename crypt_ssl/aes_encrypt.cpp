@@ -1,11 +1,5 @@
 #include "aes_encrypt.hpp"
 
-// unsigned char key[KEY_SIZE] = {'a', '4', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-// 	'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-// 	'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a'};
-// unsigned char iv_in[BLOCK_SIZE] = {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-// 	'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a'};
-
 std::string
 aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE],
 	const std::string& ptext)
