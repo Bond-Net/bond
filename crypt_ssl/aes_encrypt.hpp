@@ -79,11 +79,12 @@ typedef unsigned char byte;
 typedef std::basic_string<char, std::char_traits<char>, zallocator<char> > secure_string;
 using EVP_CIPHER_CTX_free_ptr = std::unique_ptr<EVP_CIPHER_CTX, decltype(&::EVP_CIPHER_CTX_free)>;
 
-void
-gen_params(byte key[KEY_SIZE], byte iv[BLOCK_SIZE], std::string ppass);
 std::string
-aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], const std::string& ptext);
+aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE],
+	const std::string& ptext);
+
 std::string
-aes_decrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], const std::string& ctext);
+aes_decrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], 
+	const std::string& ctext);
 
 #endif // DFS_SSL_CRYPTER_H

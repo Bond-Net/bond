@@ -2,14 +2,6 @@
 #include <openssl/sha.h>
 #include <fstream>
 
-typedef struct binary_reg_char
-{
-	char identity[96];
-	char username[96];
-	char password[96];
-}
-binary_reg_char;
-
 std::string
 sha256(const std::string str)
 {
@@ -27,92 +19,171 @@ sha256(const std::string str)
 }
 
 void
-list_encrypt(struct binary_reg *head, std::string name,
+pri(std::string stringer)
+{
+	std::cout << "HASH: ";
+	for(int i = 0; i < stringer.length(); i++)
+	{
+		std::cout << stringer[i] << "|";
+	}
+	std::cout << std::endl;
+}
+
+
+struct file_io
+{
+	char identity[96];
+	char username[96];
+	char password[96];
+};
+
+void
+list_encrypt(struct binary_reg *head, std::string filename,
 	std::string sha256_key, std::string master_key)
 {
+	// if file is empty return
 	if(head == NULL) return;
 
 	struct binary_reg *reader = head;
-	std::ofstream new_file_db("new_keylist.dat", std::ios::binary);
+	struct file_io entry;
 
-	// every keyvault begins with the hash of the code
-	new_file_db.write(sha256_key.c_str(), sizeof(char) * 96);
+	std::string c_identity;
+	std::string c_username;
+	std::string c_password;
 
-	// // Load the necessary cipher
-	// EVP_add_cipher(EVP_aes_256_cbc());
+	// Load the necessary cipher
+	EVP_add_cipher(EVP_aes_256_cbc());
 
-	// // plaintext, ciphertext, recovered text
-	// secure_string ptext = "Now is the time for all good men to come to the aide of their country";
-	// secure_string ctext, rtext;
+	if(master_key.size() < KEY_SIZE)
+	{
+		std::string tmp = master_key;
+		master_key.resize(master_key.size()+KEY_SIZE);
+		master_key = tmp;
+	}
 
-	// byte key[KEY_SIZE], iv[BLOCK_SIZE];
-	// gen_params(key, iv, "master_key");
+	// a 256 bit key and a 128 bit IV 01234567890123456789012345678901
+	unsigned char *key = (unsigned char *) master_key.c_str();
+	unsigned char *iv = (unsigned char *) "0123456789012345";
 
-	binary_reg_char *new_entry = (binary_reg_char *) malloc (sizeof(binary_reg_char));
+	// creating new keyvault which begins with the hash of the code
+	std::ofstream write_file("new_keylist.dat", std::ios::out | std::ios::binary);
+	write_file.write(sha256_key.c_str(), sizeof(char) * 96);
 
 	while(reader != NULL)
 	{
-		// decrypt
-		// strcpy(reader->identity, encrypt(msg=reader->identity, master_key).c_str());
-		// strcpy(reader->username, encrypt(msg=reader->username, master_key).c_str());
-		// strcpy(reader->password, encrypt(msg=reader->password, master_key).c_str());
+		// ENCRYPT DATA
+		c_identity = aes_encrypt(key, iv, reader->identity);
+		c_username = aes_encrypt(key, iv, reader->username);
+		c_password = aes_encrypt(key, iv, reader->password);
 
-		// strcpy(reader->identity, aes_encrypt(key, iv, reader->identity));
-		// strcpy(reader->username, aes_encrypt(key, iv, reader->username));
-		// strcpy(reader->password, aes_encrypt(key, iv, reader->password));
+		// COPY FROM STRING TO CHAR *
+		strcpy(entry.identity, c_identity.c_str());
+		strcpy(entry.username, c_username.c_str());
+		strcpy(entry.password, c_password.c_str());
 
-		strcpy(new_entry->identity, reader->identity.c_str());
-		strcpy(new_entry->username, reader->username.c_str());
-		strcpy(new_entry->password, reader->password.c_str());
+		// printf("ENCR| entry.identity: |%s|\n", entry.identity);
+		// printf("ENCR| entry.username: |%s|\n", entry.username);
+		// printf("ENCR| entry.password: |%s|\n", entry.password);
 
-		new_file_db.write((char*) new_entry, sizeof(binary_reg_char));
+		// storing data to binary file encrypted
+		write_file.write((char *) &entry, sizeof(struct file_io));
 
 		reader = reader->next;
 	}
 
-	new_file_db.close();
+	// OPENSSL_cleanse(key, KEY_SIZE);
+	// OPENSSL_cleanse(iv, BLOCK_SIZE);
+	key = (unsigned char *)"";
+	iv = (unsigned char *)"";
 
-	remove(name.c_str());
-	rename("new_keylist.dat", name.c_str());
+	write_file.close();
+
+	remove(filename.c_str());
+	rename("new_keylist.dat", filename.c_str());
+
+	//
+
+	struct binary_reg *headk = NULL, *tailk = NULL;
+	std::ifstream file_db(filename, std::ios::in | std::ios::binary);
+	if (!file_db.is_open())
+	{
+		std::cout << "failed to open " << filename << '\n';
+	}
+	else
+	{
+		char sha256_key_c[96];
+		file_db.read((char*) &sha256_key_c, sizeof(char) * 96);
+		list_decrypt(&headk, &tailk, master_key, &file_db);
+	}
+
+	file_db.close();
+
+	//
 }
 
 void
 list_decrypt(struct binary_reg **head, struct binary_reg **tail,
-	std::string master_key, std::ifstream *file_db)
+	std::string master_key, std::ifstream *read_file)
 {
-	struct binary_reg *row_from_db_prev = NULL, *row_from_db = NULL;
-	int not_gone_through = 1;
+	// Load the necessary cipher
+	EVP_add_cipher(EVP_aes_256_cbc());
 
-	row_from_db = new binary_reg();
-	binary_reg_char *new_entry = (binary_reg_char *) malloc (sizeof(binary_reg_char));
+	struct file_io entry;
+	struct binary_reg *reader = new binary_reg(), *reader_prev = NULL;
 
-	*head = row_from_db;
-	*tail = row_from_db;
+	bool gone = false;
 
-	while (file_db->read((char*) new_entry, sizeof(binary_reg_char)))
+	*head = reader;
+	*tail = reader;
+
+	if(master_key.size() < KEY_SIZE)
 	{
-		std::cout << "gamomano" << std::endl;
-
-		//decrypt
-		// strcpy(row_from_db->identity, decrypt(msg=row_from_db->identity, master_key).c_str());
-		// strcpy(row_from_db->username, decrypt(msg=row_from_db->username, master_key).c_str());
-		// strcpy(row_from_db->password, decrypt(msg=row_from_db->password, master_key).c_str());
-
-		row_from_db->identity = new_entry->identity;
-		row_from_db->username = new_entry->username;
-		row_from_db->password = new_entry->password;
-
-		row_from_db->next = new binary_reg();
-		row_from_db_prev = row_from_db;
-		row_from_db = row_from_db->next;
-
-		not_gone_through = 0;
+		std::string tmp = master_key;
+		master_key.resize(master_key.size()+KEY_SIZE);
+		master_key = tmp;
 	}
-	*tail = row_from_db_prev;
-	
-	if(not_gone_through) *head = NULL;
-	else row_from_db_prev->next = NULL;
+
+	// a 256 bit key and a 128 bit IV
+	unsigned char *key = (unsigned char *) master_key.c_str();
+	unsigned char *iv = (unsigned char *) "0123456789012345";
+
+	while(read_file->read((char *) &entry, sizeof(struct file_io)))
+	{
+		// COPY FROM CHAR * TO STRING
+		reader->identity = entry.identity;
+		reader->username = entry.username;
+		reader->password = entry.password;
+
+		// DECRYPT DATA
+		reader->identity = aes_decrypt(key, iv, reader->identity);
+		reader->username = aes_decrypt(key, iv, reader->username);
+		reader->password = aes_decrypt(key, iv, reader->password);
+
+		std::cout << "DECR| reader->identity: |" << reader->identity << "|" << std::endl;
+		std::cout << "DECR| reader->username: |" << reader->username << "|" << std::endl;
+		std::cout << "DECR| reader->password: |" << reader->password << "|" << std::endl;
+
+		reader->next = new binary_reg();
+		reader_prev = reader;
+		reader = reader->next;
+
+		gone = true;
+	}
+	printf("[%s/%d]\n", __FILE__, __LINE__);
+
+	// OPENSSL_cleanse(key, KEY_SIZE);
+	// OPENSSL_cleanse(iv, BLOCK_SIZE);
+	key = (unsigned char *)"";
+	iv = (unsigned char *)"";
+
+	*tail = reader_prev;
+
+	if(!gone) *head = NULL;
+	else reader_prev->next = NULL;
+
+	printf("[%s/%d]\n", __FILE__, __LINE__);
 }
+
 
 // bool
 // encrypt_list(std::string old_file, std::string new_file, std::string master_key)
