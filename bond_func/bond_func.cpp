@@ -36,18 +36,24 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 		(*head)->prev = NULL;
 
 		(*tail) = (*head);
+
+		return true;
 	}
 	else if((*head)->identity >= usrinp->identity) // head entry
 	{
 		usrinp->next = (*head); 
 		(*head)->prev = usrinp; 
 		(*head) = usrinp;
+
+		return true;
 	}
 	else if((*tail)->identity < usrinp->identity) // tail entry
 	{
 		usrinp->prev = (*tail); 
 		(*tail)->next = usrinp; 
 		(*tail) = usrinp;
+
+		return true;
 	}
 	else // middle entry
 	{	
@@ -62,7 +68,11 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 
 		usrinp->next->prev = usrinp;
 		usrinp->prev->next = usrinp;
+
+		return true;
 	}
+
+	return false;
 }
 
 bool
@@ -139,6 +149,7 @@ list_all(struct binary_reg *head)
 	if(head == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
+		return false;
 	}
 	else
 	{
@@ -153,6 +164,8 @@ list_all(struct binary_reg *head)
 			reader = reader->next;
 		}
 	}
+
+	return true;
 }
 
 bool
@@ -161,6 +174,7 @@ list_from(struct binary_reg *head)
 	if(head == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
+		return false;
 	}
 	else
 	{
@@ -183,6 +197,8 @@ list_from(struct binary_reg *head)
 			reader = reader->next;
 		}
 	}
+
+	return true;
 }
 
 bool
@@ -191,6 +207,7 @@ edit(struct binary_reg *head)
 	if(head == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
+		return true;
 	}
 	else
 	{
@@ -212,4 +229,6 @@ edit(struct binary_reg *head)
 			reader = reader->next;
 		}
 	}
+
+	return true;
 }
