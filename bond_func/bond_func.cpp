@@ -139,8 +139,9 @@ delete_pass(struct binary_reg **head, struct binary_reg **tail)
 		}
 
 		std::cout << "Did not find entry" << std::endl;
-		return false;
 	}
+
+	return false;
 }
 
 bool
