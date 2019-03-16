@@ -13,20 +13,11 @@
 #include <iomanip>		//Convenient spacing
 #include <cstring>		//Manipulate c-strings
 
-void
-change(struct binary_reg *a, struct binary_reg *b);
-
-void
-check(struct binary_reg *start);
-
-void
-sort(struct binary_reg *head);
-
 bool
 insert(struct binary_reg **head, struct binary_reg **tail);
 
 bool
-delete_pass(struct binary_reg *head, struct binary_reg *tail);
+delete_pass(struct binary_reg **head, struct binary_reg **tail);
 
 bool
 list_all(struct binary_reg *head);

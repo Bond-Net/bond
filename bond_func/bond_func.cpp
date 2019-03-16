@@ -14,128 +14,122 @@ typedef struct binary_reg
 }
 binary_reg;
 
-void
-change(struct binary_reg *a, struct binary_reg *b)
-{
-	struct binary_reg temp;
-
-	temp.identity = a->identity;
-	temp.username = a->username;
-	temp.password = a->password;
-
-	a->identity = b->identity;
-	a->username = b->username;
-	a->password = b->password;
-
-	b->identity = temp.identity;
-	b->username = temp.username;
-	b->password = temp.password;
-}
-
-void
-check(struct binary_reg *start)
-{
-	int swapped;
-	struct binary_reg *current;
-	struct binary_reg *next_one = NULL;
-
-	if (current == NULL) return;
-
-	do
-	{
-		swapped = 0;
-		current = start;
-
-		while (current->next != next_one)
-		{
-			if (current->identity > current->next->identity)
-			{
-				change(current, current->next);
-				swapped = 1;
-			}
-			current = current->next;
-		}
-		next_one = current;
-	}
-	while (swapped);
-}
-
-void
-sort(struct binary_reg *head)
-{
-	struct binary_reg *reader = head;
-	check(reader);
-}
-
 bool
 insert(struct binary_reg **head, struct binary_reg **tail)
 {
-	std::cout << "\n" bold_on_2 "enter <new identity> <new username> <new password>: " bold_re_2;
+	struct binary_reg *usrinp = new binary_reg();
+	struct binary_reg *reader;
 
-	if((*head) == NULL)
+	std::cout << "\n" bold_on_2 "enter <new identity> <new username> <new password>: " bold_re_2;
+	std::cin >> usrinp->identity >> usrinp->username >> usrinp->password;
+
+	
+	if((*head) == NULL) // first entry
 	{
 		(*head) = new binary_reg();
 
-		std::cin >> (*head)->identity >> (*head)->username >> (*head)->password;
+		(*head)->identity = usrinp->identity;
+		(*head)->username = usrinp->username;
+		(*head)->password = usrinp->password;
+
+		(*head)->next = NULL;
+		(*head)->prev = NULL;
 
 		(*tail) = (*head);
 	}
-	else
+	else if((*head)->identity >= usrinp->identity) // head entry
 	{
-		(*tail)->next = new binary_reg();
-		(*tail)->next->next = NULL;
+		usrinp->next = (*head); 
+		(*head)->prev = usrinp; 
+		(*head) = usrinp;
+	}
+	else if((*tail)->identity < usrinp->identity) // tail entry
+	{
+		usrinp->prev = (*tail); 
+		(*tail)->next = usrinp; 
+		(*tail) = usrinp;
+	}
+	else // middle entry
+	{	
+		for(reader = (*head);
+			reader->next != NULL && reader->identity < usrinp->identity;
+			reader = reader->next);
 
-		std::cin >> (*tail)->next->identity >> (*tail)->next->username >> (*tail)->next->password;
-		
-		(*tail) = (*tail)->next;
+		printf("reader->identity = %s\n", reader->identity.c_str());
+
+		usrinp->next = reader;
+		usrinp->prev = reader->prev;
+
+		usrinp->next->prev = usrinp;
+		usrinp->prev->next = usrinp;
 	}
 }
 
 bool
-delete_pass(struct binary_reg *head, struct binary_reg *tail)
+delete_pass(struct binary_reg **head, struct binary_reg **tail)
 {
-	std::string usr_msg2, usr_msg3;
-
-	if(head == NULL)
+	if((*head) == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
 	}
 	else
 	{
+		struct binary_reg *usrinp = new binary_reg();
+		struct binary_reg *reader = (*head), *prev = NULL;
+
 		std::cout	<< "\n" bold_on_2 "enter <identity> <username> of the "
-				<<"password you want to delete: " bold_re_2 ;
-		std::cin		>> usr_msg2 >> usr_msg3;
+					<<"password you want to delete: " bold_re_2 ;
+		std::cin >> usrinp->identity >> usrinp->username;
 
-		struct binary_reg *reader = head;
-		struct binary_reg *prev = NULL;
-
-		while(reader != NULL)
+		if((*head)->identity == usrinp->identity
+			&& (*head)->username == usrinp->username) // head deletion
 		{
-			if(reader->identity == usr_msg2 && reader->username == usr_msg3)
+			if((*head) == (*tail))
 			{
-				if(prev == NULL)
-				{
-					head = head->next;
-				}
-				else if(reader->next != NULL)
-				{
-					prev->next = reader->next;
-				}
-				else
-				{
-					prev->next = NULL;
-					tail = prev;
-				}
-
-				free(reader);
-				break;
+				free((*head));
+				(*head) = (*tail) = NULL;
 			}
+			else
+			{
+				(*head) = (*head)->next;
+				free((*head)->prev);	
+				(*head)->prev = NULL;
 
-			prev = reader;
-			reader = reader->next;
+				return true;
+			}
+		}
+		else if((*tail)->identity == usrinp->identity
+			&& (*tail)->username == usrinp->username) // tail deletion
+		{
+			printf("tail->identity = %s\n", (*tail)->identity.c_str());	
+			(*tail)->prev->next = NULL;
+			(*tail) = (*tail)->prev;
+			free((*tail)->next);
+
+			return true;
+		}
+		else // middle deletion
+		{	
+			for(reader = (*head);
+				reader->next != NULL;
+				reader = reader->next)
+			{
+				if(reader->identity == usrinp->identity
+					&& reader->username == usrinp->username)
+				{
+					printf("reader->identity = %s\n", reader->identity.c_str());
+					
+					reader->prev->next = reader->next;
+					reader->next->prev = reader->prev;
+
+					free(reader);
+					return true;
+				}
+			}
 		}
 
-		if(reader == NULL) std::cout << "Did not find entry" << std::endl;
+		std::cout << "Did not find entry" << std::endl;
+		return false;
 	}
 }
 

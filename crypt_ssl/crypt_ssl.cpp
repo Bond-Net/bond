@@ -124,6 +124,8 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 		// std::cout << "DECR| reader->password: |" << reader->password << "|" << std::endl;
 
 		reader->next = new binary_reg();
+		reader->next->prev = reader;
+		
 		reader_prev = reader;
 		reader = reader->next;
 

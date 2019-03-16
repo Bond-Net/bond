@@ -23,14 +23,10 @@
 int
 main(int argc, char *argv[])
 {
-	std::string msg, usr_msg1, usr_msg2, usr_msg3, usr_msg4, filename;
-	std::string master_key, sha256_key;
+	std::string msg, filename, master_key, sha256_key;
 
 	char sha256_key_c[96];
-	struct binary_reg *head = NULL, *tail = NULL, *reader = NULL, 
-		*prev = NULL, *row_from_db_prev = NULL, *row_from_db = NULL;
-
-	int not_gone_through = 1;
+	struct binary_reg *head = NULL, *tail = NULL;
 	bool verbose = false;
 
 	arg_int(argc, argv, &filename, &verbose);
@@ -77,7 +73,8 @@ main(int argc, char *argv[])
 	else
 	{
 		std::cout	<< "It seems like you have no key list." << std::endl
-					<< "Enter your new master key (remember to write it down)" << std::endl;
+					<< "Enter your new master key (remember to write it down)"
+					<< std::endl;
 					
 		while(true)
 		{
@@ -103,14 +100,14 @@ main(int argc, char *argv[])
 	while(true)
 	{
 		std::cout << "\n" bold_on "command: " bold_re ;
-		std::cin >> usr_msg1;
+		std::cin >> msg;
 
-		if(usr_msg1 == "exit" || usr_msg1 == "quit" || usr_msg1 == "q")
+		if(msg == "exit" || msg == "quit" || msg == "q")
 		{
 			list_encrypt(head, filename, sha256_key, master_key);
 			break;
 		}
-		else if(usr_msg1 == "reset")
+		else if(msg == "reset" || msg == "rst")
 		{
 			if(file_exists(filename))
 			{
@@ -123,7 +120,7 @@ main(int argc, char *argv[])
 				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
-		else if(usr_msg1 == "delete-file")
+		else if(msg == "delete-file")
 		{
 			if(file_exists(filename))
 			{
@@ -132,22 +129,25 @@ main(int argc, char *argv[])
 				tail = NULL;
 			}
 		}
-		else if(usr_msg1 == "insert" || usr_msg1 == "i")
+		else if(msg == "insert" || msg == "i")
 		{
+			// insert
 			insert(&head, &tail);
 		}
-		else if(usr_msg1 == "delete-pass")
+		else if(msg == "delete-pass" || msg == "dl")
 		{
 			if(file_exists(filename))
 			{
-				delete_pass(head, tail);
+				printf("POINTER PREV: %p\n", head);
+				delete_pass(&head, &tail);
+				printf("POINTER AFTR: %p\n", head);
 			}
 			else
 			{
 				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
-		else if(usr_msg1 == "list-all" || usr_msg1 == "ls")
+		else if(msg == "list-all" || msg == "ls")
 		{
 			if(file_exists(filename))
 			{
@@ -158,7 +158,7 @@ main(int argc, char *argv[])
 				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
-		else if(usr_msg1 == "list-from")
+		else if(msg == "list-from" || msg == "lsf")
 		{
 			if(file_exists(filename))
 			{
@@ -169,7 +169,7 @@ main(int argc, char *argv[])
 				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
-		else if(usr_msg1 == "edit")
+		else if(msg == "edit")
 		{
 			if(file_exists(filename))
 			{
@@ -178,25 +178,6 @@ main(int argc, char *argv[])
 			else
 			{
 				std::cout << "you do not have a key list" << std::endl;
-			}
-		}
-		else if(usr_msg1 == "sort")
-		{
-			if(head == NULL)
-			{
-				std::cout << "your key list is empty" << std::endl;
-			}
-			else
-			{
-				if(file_exists(filename))
-				{
-					reader = head;
-					sort(reader);
-				}
-				else
-				{
-					std::cout << "you do not have a key list" << std::endl;
-				}
 			}
 		}
 		else
@@ -209,7 +190,6 @@ main(int argc, char *argv[])
 				"\tedit\n"
 				"\tlist-all\n"
 				"\tlist-from\n"
-				"\tsort (alphabetically)\n"
 				"\treset\n"
 			);
 		}
