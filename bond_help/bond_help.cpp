@@ -55,4 +55,6 @@ arg_int(int argc, char** argv, std::string *filename, bool *verbose)
 				break;	
 		}
 	}
+
+	return true;
 }
