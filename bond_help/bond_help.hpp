@@ -36,10 +36,14 @@
 
 typedef struct binary_reg
 {
-	std::string identity;
-	std::string username;
-	std::string password;
+	char identity[128];
+	char username[128];
+	char password[128];
 
+	int identity_len;
+	int username_len;
+	int password_len;
+	
 	struct binary_reg *next;
 	struct binary_reg *prev;
 }

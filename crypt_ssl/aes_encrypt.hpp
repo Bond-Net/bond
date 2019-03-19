@@ -7,6 +7,7 @@
 #include <limits>
 #include <stdexcept>
 
+#include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
@@ -16,12 +17,15 @@ static const unsigned int BLOCK_SIZE = 16;
 typedef unsigned char byte;
 using EVP_CIPHER_CTX_free_ptr = std::unique_ptr<EVP_CIPHER_CTX, decltype(&::EVP_CIPHER_CTX_free)>;
 
-std::string
-aes_encrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE],
-	const std::string& ptext);
+void
+handleErrors(void);
 
-std::string
-aes_decrypt(const byte key[KEY_SIZE], const byte iv[BLOCK_SIZE], 
-	const std::string& ctext);
+int
+aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
+  unsigned char *iv, unsigned char *ciphertext);
+
+int
+aes_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+  unsigned char *iv, unsigned char *plaintext);
 
 #endif // DFS_SSL_CRYPTER_H

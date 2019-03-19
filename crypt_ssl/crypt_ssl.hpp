@@ -22,7 +22,7 @@ sha256(const std::string str);
 
 void
 list_encrypt(struct binary_reg *head, std::string filename,
-	std::string sha256_key, std::string master_key);
+	char *sha256_key, std::string master_key);
 
 void
 list_decrypt(struct binary_reg **head, struct binary_reg **tail,

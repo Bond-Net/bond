@@ -13,7 +13,7 @@ PASSREAD=pass_read/pass_read.cpp
 FILEDIRC=$(BONDMAIN) $(BONDFUNC) $(BONDHELP) $(PASSREAD) $(CRYPTSSL) $(CRYPTAES)
 
 all:
-	clear
+	# clear
 	$(info cleared terminal) $(info)
 
 	$(COMPILER) $(FILENAME) $(FILEDIRC) $(OPENSSLF) $(STDVERSN)

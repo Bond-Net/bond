@@ -18,30 +18,27 @@ sha256(const std::string str)
 	return ss.str();
 }
 
-struct file_io
+
+void
+kappaprint(char *str)
 {
-	char identity[96];
-	char username[96];
-	char password[96];
-};
+	for(int i=0; i < 16; i++)
+	{ std::cout << str[i] << ","; }
+printf("\n");
+}
 
 void
 list_encrypt(struct binary_reg *head, std::string filename,
-	std::string sha256_key, std::string master_key)
+	char *sha256_key, std::string master_key)
 {
 	// if file is empty return
 	if(head == NULL) return;
 
 	struct binary_reg *reader = head;
-	struct file_io entry;
-
-	std::string c_identity;
-	std::string c_username;
-	std::string c_password;
-
+	struct binary_reg *cypher = new binary_reg();
 	// Load the necessary cipher
 	EVP_add_cipher(EVP_aes_256_cbc());
-
+	
 	if(master_key.size() < KEY_SIZE)
 	{
 		std::string tmp = master_key;
@@ -55,24 +52,29 @@ list_encrypt(struct binary_reg *head, std::string filename,
 
 	// creating new keyvault which begins with the hash of the code
 	std::ofstream write_file("new_keylist.dat", std::ios::out | std::ios::binary);
-	write_file.write(sha256_key.c_str(), sizeof(char) * 96);
+	write_file.write(sha256_key, sizeof(char) * 128);
 
 	while(reader != NULL)
 	{
 		// ENCRYPT
-		strcpy(entry.identity, aes_encrypt(key, iv, reader->identity).c_str());
-		strcpy(entry.username, aes_encrypt(key, iv, reader->username).c_str());
-		strcpy(entry.password, aes_encrypt(key, iv, reader->password).c_str());
-
-		// printf("ENCR| entry.identity: |%s|\n", entry.identity);
-		// printf("ENCR| entry.username: |%s|\n", entry.username);
-		// printf("ENCR| entry.password: |%s|\n", entry.password);
+		cypher->identity_len = aes_encrypt((unsigned char *)reader->identity, strlen(reader->identity),
+			key, iv, (unsigned char *)cypher->identity);
+		cypher->username_len = aes_encrypt((unsigned char *)reader->username, strlen(reader->username),
+			key, iv, (unsigned char *)cypher->username);
+		cypher->password_len = aes_encrypt((unsigned char *)reader->password, strlen(reader->password),
+			key, iv, (unsigned char *)cypher->password);
 
 		// storing data to binary file encrypted
-		write_file.write((char *) &entry, sizeof(struct file_io));
+		printf("writing plain identity: |%-30s| username: |%-30s| password: |%-30s|\n",
+			reader->identity, reader->username, reader->password);
+		printf("writing crypt identity: |%-30s| username: |%-30s| password: |%-30s|\n",
+			cypher->identity, cypher->username, cypher->password);
+
+		write_file.write((char *) cypher, sizeof(struct binary_reg));
 
 		reader = reader->next;
 	}
+	printf("%s/%d\n", __FILE__, __LINE__);
 
 	// OPENSSL_cleanse(key, KEY_SIZE);
 	// OPENSSL_cleanse(iv, BLOCK_SIZE);
@@ -93,8 +95,10 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 	// Load the necessary cipher
 	EVP_add_cipher(EVP_aes_256_cbc());
 
-	struct file_io entry;
-	struct binary_reg *reader = new binary_reg(), *reader_prev = NULL;
+	struct binary_reg *entry = new binary_reg();
+	struct binary_reg *pltext = new binary_reg();
+	struct binary_reg *reader = new binary_reg();
+	struct binary_reg *reader_prev = NULL;
 
 	bool gone = false;
 
@@ -108,20 +112,28 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 		master_key = tmp;
 	}
 
-	// a 256 bit key and a 128 bit IV
+	// a 256 bit key and a 128 bit IV 01234567890123456789012345678901
 	unsigned char *key = (unsigned char *) master_key.c_str();
 	unsigned char *iv = (unsigned char *) "0123456789012345";
 
-	while(read_file->read((char *) &entry, sizeof(struct file_io)))
+	while(read_file->read((char *) entry, sizeof(struct binary_reg)))
 	{
 		// DECRYPT
-		reader->identity = aes_decrypt(key, iv, std::string(entry.identity));
-		reader->username = aes_decrypt(key, iv, std::string(entry.username));
-		reader->password = aes_decrypt(key, iv, std::string(entry.password));
+		pltext->identity_len = aes_decrypt((unsigned char *)entry->identity, entry->identity_len,
+			key, iv, (unsigned char *)pltext->identity);
+		pltext->username_len = aes_decrypt((unsigned char *)entry->username, entry->username_len,
+			key, iv, (unsigned char *)pltext->username);
+		pltext->password_len = aes_decrypt((unsigned char *)entry->password, entry->password_len,
+			key, iv, (unsigned char *)pltext->password);
 
-		// std::cout << "DECR| reader->identity: |" << reader->identity << "|" << std::endl;
-		// std::cout << "DECR| reader->username: |" << reader->username << "|" << std::endl;
-		// std::cout << "DECR| reader->password: |" << reader->password << "|" << std::endl;
+		/* Add a NULL terminator. We are expecting printable text */
+  		pltext->identity[pltext->identity_len] = '\0';
+  		pltext->username[pltext->username_len] = '\0';
+  		pltext->password[pltext->password_len] = '\0';
+
+		strcpy(reader->identity, pltext->identity);
+		strcpy(reader->username, pltext->username);
+		strcpy(reader->password, pltext->password);
 
 		reader->next = new binary_reg();
 		reader->next->prev = reader;

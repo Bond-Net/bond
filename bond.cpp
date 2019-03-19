@@ -25,7 +25,7 @@ main(int argc, char *argv[])
 {
 	std::string msg, filename, master_key, sha256_key;
 
-	char sha256_key_c[96];
+	char sha256_key_c[128];
 	struct binary_reg *head = NULL, *tail = NULL;
 	bool verbose = false;
 
@@ -43,7 +43,7 @@ main(int argc, char *argv[])
 		}
 		else
 		{
-			file_db.read(reinterpret_cast<char *>(&sha256_key_c), sizeof(char) * 96);
+			file_db.read(reinterpret_cast<char *>(&sha256_key_c), sizeof(char) * 128);
 		
 			sha256_key = sha256_key_c;
 
@@ -75,7 +75,7 @@ main(int argc, char *argv[])
 		std::cout	<< "It seems like you have no key list." << std::endl
 					<< "Enter your new master key (remember to write it down)"
 					<< std::endl;
-					
+
 		while(true)
 		{
 			std::cout << "> enter master key:\t";
@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 			}
 
 			std::ofstream file_db(filename, std::ios::binary);
-			file_db.write(sha256_key.c_str(), sizeof(char) * 96);
+			file_db.write(sha256_key.c_str(), sizeof(char) * 128);
 			file_db.close();
 
 			break;
@@ -104,7 +104,7 @@ main(int argc, char *argv[])
 
 		if(msg == "exit" || msg == "quit" || msg == "q")
 		{
-			list_encrypt(head, filename, sha256_key, master_key);
+			list_encrypt(head, filename, (char *)sha256_key.c_str(), master_key);
 			break;
 		}
 		else if(msg == "reset" || msg == "rst")
@@ -112,7 +112,7 @@ main(int argc, char *argv[])
 			if(file_exists(filename))
 			{
 				std::ofstream file_db(filename, std::ios::binary);
-				file_db.write(sha256_key_c, sizeof(char) * 96);
+				file_db.write(sha256_key_c, sizeof(char) * 128);
 				file_db.close();
 			}
 			else
@@ -138,9 +138,7 @@ main(int argc, char *argv[])
 		{
 			if(file_exists(filename))
 			{
-				printf("POINTER PREV: %p\n", head);
 				delete_pass(&head, &tail);
-				printf("POINTER AFTR: %p\n", head);
 			}
 			else
 			{
