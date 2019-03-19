@@ -18,13 +18,23 @@ sha256(const std::string str)
 	return ss.str();
 }
 
-
-void
-kappaprint(char *str)
+char *
+sha256(char *str)
 {
-	for(int i=0; i < 16; i++)
-	{ std::cout << str[i] << ","; }
-printf("\n");
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    char *str_hash = (char *) malloc (sizeof(char) * 65);
+
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, str, strlen(str));
+    SHA256_Final(hash, &sha256);
+
+    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+	    sprintf(str_hash + (i * 2), "%02x", hash[i]);
+    
+    str_hash[64] = 0;
+
+    return str_hash;
 }
 
 void
@@ -36,6 +46,7 @@ list_encrypt(struct binary_reg *head, std::string filename,
 
 	struct binary_reg *reader = head;
 	struct binary_reg *cypher = new binary_reg();
+
 	// Load the necessary cipher
 	EVP_add_cipher(EVP_aes_256_cbc());
 	
@@ -57,27 +68,17 @@ list_encrypt(struct binary_reg *head, std::string filename,
 	while(reader != NULL)
 	{
 		// ENCRYPT
-		cypher->identity_len = aes_encrypt((unsigned char *)reader->identity, strlen(reader->identity),
-			key, iv, (unsigned char *)cypher->identity);
-		cypher->username_len = aes_encrypt((unsigned char *)reader->username, strlen(reader->username),
-			key, iv, (unsigned char *)cypher->username);
-		cypher->password_len = aes_encrypt((unsigned char *)reader->password, strlen(reader->password),
-			key, iv, (unsigned char *)cypher->password);
-
-		// storing data to binary file encrypted
-		printf("writing plain identity: |%-30s| username: |%-30s| password: |%-30s|\n",
-			reader->identity, reader->username, reader->password);
-		printf("writing crypt identity: |%-30s| username: |%-30s| password: |%-30s|\n",
-			cypher->identity, cypher->username, cypher->password);
+		cypher->identity_len = aes_encrypt((unsigned char *)reader->identity, 
+			strlen(reader->identity), key, iv, (unsigned char *)cypher->identity);
+		cypher->username_len = aes_encrypt((unsigned char *)reader->username, 
+			strlen(reader->username), key, iv, (unsigned char *)cypher->username);
+		cypher->password_len = aes_encrypt((unsigned char *)reader->password, 
+			strlen(reader->password), key, iv, (unsigned char *)cypher->password);
 
 		write_file.write((char *) cypher, sizeof(struct binary_reg));
 
 		reader = reader->next;
 	}
-	printf("%s/%d\n", __FILE__, __LINE__);
-
-	// OPENSSL_cleanse(key, KEY_SIZE);
-	// OPENSSL_cleanse(iv, BLOCK_SIZE);
 
 	key = (unsigned char *)"";
 	iv = (unsigned char *)"";
@@ -96,7 +97,6 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 	EVP_add_cipher(EVP_aes_256_cbc());
 
 	struct binary_reg *entry = new binary_reg();
-	struct binary_reg *pltext = new binary_reg();
 	struct binary_reg *reader = new binary_reg();
 	struct binary_reg *reader_prev = NULL;
 
@@ -119,21 +119,17 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 	while(read_file->read((char *) entry, sizeof(struct binary_reg)))
 	{
 		// DECRYPT
-		pltext->identity_len = aes_decrypt((unsigned char *)entry->identity, entry->identity_len,
-			key, iv, (unsigned char *)pltext->identity);
-		pltext->username_len = aes_decrypt((unsigned char *)entry->username, entry->username_len,
-			key, iv, (unsigned char *)pltext->username);
-		pltext->password_len = aes_decrypt((unsigned char *)entry->password, entry->password_len,
-			key, iv, (unsigned char *)pltext->password);
+		reader->identity_len = aes_decrypt((unsigned char *)entry->identity,
+			entry->identity_len, key, iv, (unsigned char *)reader->identity);
+		reader->username_len = aes_decrypt((unsigned char *)entry->username,
+			entry->username_len, key, iv, (unsigned char *)reader->username);
+		reader->password_len = aes_decrypt((unsigned char *)entry->password,
+			entry->password_len, key, iv, (unsigned char *)reader->password);
 
 		/* Add a NULL terminator. We are expecting printable text */
-  		pltext->identity[pltext->identity_len] = '\0';
-  		pltext->username[pltext->username_len] = '\0';
-  		pltext->password[pltext->password_len] = '\0';
-
-		strcpy(reader->identity, pltext->identity);
-		strcpy(reader->username, pltext->username);
-		strcpy(reader->password, pltext->password);
+  		reader->identity[reader->identity_len] = '\0';
+  		reader->username[reader->username_len] = '\0';
+  		reader->password[reader->password_len] = '\0';
 
 		reader->next = new binary_reg();
 		reader->next->prev = reader;
@@ -144,9 +140,6 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 		gone = true;
 	}
 
-	// OPENSSL_cleanse(key, KEY_SIZE);
-	// OPENSSL_cleanse(iv, BLOCK_SIZE);
-
 	key = (unsigned char *)"";
 	iv = (unsigned char *)"";
 
@@ -154,6 +147,4 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 
 	if(!gone) *head = NULL;
 	else reader_prev->next = NULL;
-
-	printf("[%s/%d]\n", __FILE__, __LINE__);
 }

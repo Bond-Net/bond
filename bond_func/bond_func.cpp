@@ -1,7 +1,7 @@
 #include "bond_func.hpp"
 
-#define bold_on_2	 	"\e[1m"
-#define bold_re_2		"\e[0m"
+#define BOLD_ON	 	"\e[1m"
+#define BOLD_OFF	"\e[0m"
 
 typedef struct binary_reg
 {
@@ -18,25 +18,19 @@ typedef struct binary_reg
 }
 binary_reg;
 
-inline void
-newlinermv(char *word_str)
-{
-	int len = strlen(word_str);
-	if (len > 0 && word_str[len-1] == '\n')
-		word_str[--len] = '\0';
-}
-
 bool
 insert(struct binary_reg **head, struct binary_reg **tail)
 {
 	struct binary_reg *usrinp = (struct binary_reg *) malloc (sizeof(binary_reg));
 	struct binary_reg *reader;
 
-	std::cout << "\n" bold_on_2 "enter <new identity> <new username> <new password>: " bold_re_2;
+	std::cout << "\n" BOLD_ON "enter <new identity> "
+		"<new username> <new password>: " BOLD_OFF;
 	std::cin >> usrinp->identity >> usrinp->username >> usrinp->password;
 
 	if((*head) == NULL) // first entry
 	{
+		printf("FIRST\n");
 		(*head) = usrinp;
 
 		(*head)->next = NULL;
@@ -46,16 +40,18 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 
 		return true;
 	}
-	else if((*head)->identity >= usrinp->identity) // head entry
+	else if(strcmp((*head)->identity, usrinp->identity) >= 0) // head entry
 	{
+		printf("HEAD\n");
 		usrinp->next = (*head); 
 		(*head)->prev = usrinp; 
 		(*head) = usrinp;
 
 		return true;
 	}
-	else if((*tail)->identity < usrinp->identity) // tail entry
+	else if(strcmp((*tail)->identity, usrinp->identity) < 0)  // tail entry
 	{
+		printf("TAIL\n");
 		usrinp->prev = (*tail); 
 		(*tail)->next = usrinp; 
 		(*tail) = usrinp;
@@ -63,9 +59,11 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 		return true;
 	}
 	else // middle entry
-	{	
+	{
+		printf("MID\n");
 		for(reader = (*head);
-			reader->next != NULL && strcmp(reader->identity, usrinp->identity) < 0;
+			reader->next != NULL &&
+				strcmp(reader->identity, usrinp->identity) < 0;
 			reader = reader->next);
 
 		usrinp->next = reader;
@@ -92,8 +90,8 @@ delete_pass(struct binary_reg **head, struct binary_reg **tail)
 		struct binary_reg *usrinp = (struct binary_reg *) malloc (sizeof(binary_reg));
 		struct binary_reg *reader = (*head), *prev = NULL;
 
-		std::cout	<< "\n" bold_on_2 "enter <identity> <username> of the "
-					<<"password you want to delete: " bold_re_2 ;
+		std::cout	<< "\n" BOLD_ON "enter <identity> <username> of the "
+					<<"password you want to delete: " BOLD_OFF ;
 		std::cin >> usrinp->identity >> usrinp->username;
 
 		if(strcmp((*head)->identity, usrinp->identity) == 0 &&
@@ -159,8 +157,10 @@ list_all(struct binary_reg *head)
 		struct binary_reg *reader = head;
 		while(reader != NULL)
 		{
-			printf("writing identity: |%-20s| username: |%-20s| password: |%-20s|\n",
-				reader->identity, reader->username, reader->password );
+			printf("identity: " BOLD_ON "%-25s" BOLD_OFF " username: "
+				BOLD_ON "%-25s" BOLD_OFF " password: "
+				BOLD_ON "%-25s" BOLD_OFF "\n",
+				reader->identity, reader->username, reader->password);
 
 			reader = reader->next;
 		}
@@ -181,7 +181,8 @@ list_from(struct binary_reg *head)
 	{
 		char msg[128];
 
-		std::cout << "\n" bold_on_2 "enter <identity> you want to see credentials: " bold_re_2 ;
+		std::cout << "\n" BOLD_ON "enter <identity> you want "
+			"to see credentials: " BOLD_OFF ;
 		std::cin >> msg;
 
 		struct binary_reg *reader = head;
@@ -189,8 +190,10 @@ list_from(struct binary_reg *head)
 		{
 			if(strcmp(reader->identity, msg) != 0)
 			{
-				printf("writing identity: |%-20s| username: |%-20s| password: |%-20s|\n",
-					reader->identity, reader->username, reader->password );
+				printf("identity: " BOLD_ON "%-25s" BOLD_OFF " username: "
+					BOLD_ON "%-25s" BOLD_OFF " password: "
+					BOLD_ON "%-25s" BOLD_OFF "\n",
+					reader->identity, reader->username, reader->password);
 			}
 			reader = reader->next;
 		}
@@ -211,7 +214,8 @@ edit(struct binary_reg *head)
 	{
 		char usr_msg2[128], usr_msg3[128], usr_msg4[128];
 
-		std::cout << "\n" bold_on_2 "enter <identity> <username> <new password> you want to edit: " bold_re_2 ;
+		std::cout << "\n" BOLD_ON "enter <identity> <username> "
+			"<new password> you want to edit: " BOLD_OFF ;
 		std::cin >> usr_msg2 >> usr_msg3 >> usr_msg4;
 
 		struct binary_reg *reader = head;

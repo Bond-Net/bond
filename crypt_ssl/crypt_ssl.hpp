@@ -20,6 +20,9 @@
 std::string
 sha256(const std::string str);
 
+char *
+sha256(char *str);
+
 void
 list_encrypt(struct binary_reg *head, std::string filename,
 	char *sha256_key, std::string master_key);

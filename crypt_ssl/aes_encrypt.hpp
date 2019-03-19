@@ -15,7 +15,6 @@ static const unsigned int KEY_SIZE = 32;
 static const unsigned int BLOCK_SIZE = 16;
 
 typedef unsigned char byte;
-using EVP_CIPHER_CTX_free_ptr = std::unique_ptr<EVP_CIPHER_CTX, decltype(&::EVP_CIPHER_CTX_free)>;
 
 void
 handleErrors(void);
