@@ -1,4 +1,4 @@
-# [**μBOND**](https://github.com/keybraker/BOND) <sup>*The first truly decentralized password manager*<sup>
+# [**weBOND**](https://github.com/keybraker/BOND) <sup>*The first truly decentralized password manager*<sup>
 
 ![alt text](https://github.com/keybraker/BOND/blob/master/img/bond_logo.png)
 
