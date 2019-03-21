@@ -23,9 +23,9 @@
 int
 main(int argc, char *argv[])
 {
-	std::string msg, filename, master_key, sha256_key;
+	std::string msg, filename, master_key, master_iv, sha256_key, sha256_iv;
 
-	char sha256_key_c[128];
+	char sha256_key_c[128], sha256_iv_c[128];
 	struct binary_reg *head = NULL, *tail = NULL;
 	bool verbose = false;
 
@@ -44,8 +44,10 @@ main(int argc, char *argv[])
 		else
 		{
 			file_db.read(reinterpret_cast<char *>(&sha256_key_c), sizeof(char) * 128);
-		
+			file_db.read(reinterpret_cast<char *>(&sha256_iv_c), sizeof(char) * 128);
+
 			sha256_key = sha256_key_c;
+			sha256_iv = sha256_iv_c;
 
 			while(true)
 			{
@@ -58,15 +60,31 @@ main(int argc, char *argv[])
 					continue;
 				}
 
-				std::cout	<< "code is:   " << master_key << std::endl
-							<< "sha256 is: " << sha256_key << std::endl
+				break;
+			}
+
+			while(true)
+			{
+				std::cout << "> enter master iv:\t";
+
+				if(sha256(master_iv = getpass()) != sha256_iv)
+				{
+					std::cout	<< bold_on << "incorrect iv, try again"
+								<< bold_re << std::endl << std::endl;
+					continue;
+				}
+
+				std::cout	<< "key:       " << master_key	<< std::endl
+							<< "iv:        " << master_iv	<< std::endl
+							<< "key hash:  " << sha256_key	<< std::endl
+							<< "iv  hash:  " << sha256_iv	<< std::endl
 							<< "Correct password you have unlocked the vault !"
 							<< std::endl << std::endl;
 				break;
 			}
 		}
 
-		list_decrypt(&head, &tail, master_key, &file_db);
+		list_decrypt(&head, &tail, master_key, master_iv, &file_db);
 
 		file_db.close();
 	}
@@ -79,19 +97,37 @@ main(int argc, char *argv[])
 		while(true)
 		{
 			std::cout << "> enter master key:\t";
-			sha256_key = sha256((master_key=getpass()));
+			sha256_key = sha256(getpass());
 
 			std::cout	<< "> re-enter master key:\t";
-			if(sha256(getpass()) != sha256_key)
+			if(sha256((master_key=getpass())) != sha256_key)
 			{
 				std::cout	<< bold_on << "(your passwords did not match, please retry)"
 							<< bold_re  << std::endl << std::endl;
 				continue;
 			}
 
-			std::ofstream file_db(filename, std::ios::binary);
-			file_db.write(sha256_key.c_str(), sizeof(char) * 128);
-			file_db.close();
+			break;
+		}
+
+		while(true)
+		{
+			std::cout << "> enter master iv:\t";
+			sha256_iv = sha256(master_iv=getpass());
+			if(sha256_key == sha256_iv)
+			{
+				std::cout	<< bold_on << "(your iv is the same with key, please retry)"
+							<< bold_re  << std::endl << std::endl;
+				continue;
+			}
+
+			std::cout	<< "> re-enter master iv:\t";
+			if(sha256((master_iv=getpass())) != sha256_iv)
+			{
+				std::cout	<< bold_on << "(your ivs did not match, please retry)"
+							<< bold_re  << std::endl << std::endl;
+				continue;
+			}
 
 			break;
 		}
@@ -104,16 +140,15 @@ main(int argc, char *argv[])
 
 		if(msg == "exit" || msg == "quit" || msg == "q")
 		{
-			list_encrypt(head, filename, (char *)sha256_key.c_str(), master_key);
+			list_encrypt(head, filename, (char *)sha256_key.c_str(),
+				(char *)sha256_iv.c_str(), master_key, master_iv);
 			break;
 		}
 		else if(msg == "reset" || msg == "rst")
 		{
 			if(file_exists(filename))
 			{
-				std::ofstream file_db(filename, std::ios::binary);
-				file_db.write(sha256_key_c, sizeof(char) * 128);
-				file_db.close();
+				list_encrypt(head, filename, NULL, NULL, NULL, NULL);
 			}
 			else
 			{
@@ -147,7 +182,7 @@ main(int argc, char *argv[])
 		}
 		else if(msg == "list-all" || msg == "ls")
 		{
-			if(file_exists(filename))
+			if(head != NULL)
 			{
 				list_all(head);
 			}

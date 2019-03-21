@@ -39,49 +39,57 @@ sha256(char *str)
 
 void
 list_encrypt(struct binary_reg *head, std::string filename,
-	char *sha256_key, std::string master_key)
+	char *sha256_key, char *sha256_iv, std::string master_key, std::string master_iv)
 {
-	// if file is empty return
-	if(head == NULL) return;
-
-	struct binary_reg *reader = head;
-	struct binary_reg *cypher = new binary_reg();
-
-	// Load the necessary cipher
-	EVP_add_cipher(EVP_aes_256_cbc());
-	
-	if(master_key.size() < KEY_SIZE)
-	{
-		std::string tmp = master_key;
-		master_key.resize(master_key.size()+KEY_SIZE);
-		master_key = tmp;
-	}
-
-	// a 256 bit key and a 128 bit IV 01234567890123456789012345678901
-	unsigned char *key = (unsigned char *) master_key.c_str();
-	unsigned char *iv = (unsigned char *) "0123456789012345";
-
 	// creating new keyvault which begins with the hash of the code
 	std::ofstream write_file("new_keylist.dat", std::ios::out | std::ios::binary);
 	write_file.write(sha256_key, sizeof(char) * 128);
-
-	while(reader != NULL)
+	write_file.write(sha256_iv, sizeof(char) * 128);
+	
+	if(head != NULL)
 	{
-		// ENCRYPT
-		cypher->identity_len = aes_encrypt((unsigned char *)reader->identity, 
-			strlen(reader->identity), key, iv, (unsigned char *)cypher->identity);
-		cypher->username_len = aes_encrypt((unsigned char *)reader->username, 
-			strlen(reader->username), key, iv, (unsigned char *)cypher->username);
-		cypher->password_len = aes_encrypt((unsigned char *)reader->password, 
-			strlen(reader->password), key, iv, (unsigned char *)cypher->password);
+		struct binary_reg *reader = head;
+		struct binary_reg *cypher = new binary_reg();
 
-		write_file.write((char *) cypher, sizeof(struct binary_reg));
+		// Load the necessary cipher
+		EVP_add_cipher(EVP_aes_256_cbc());
+		
+		if(master_key.size() < KEY_SIZE)
+		{
+			std::string tmp = master_key;
+			master_key.resize(master_key.size()+KEY_SIZE);
+			master_key = tmp;
+		}
 
-		reader = reader->next;
+		if(master_iv.size() < BLOCK_SIZE)
+		{
+			std::string tmp = master_iv;
+			master_iv.resize(master_iv.size()+BLOCK_SIZE);
+			master_iv = tmp;
+		}
+
+		// a 256 bit key and a 128 bit IV 01234567890123456789012345678901-0123456789012345
+		unsigned char *key = (unsigned char *) master_key.c_str();
+		unsigned char *iv = (unsigned char *) master_iv.c_str();
+
+		while(reader != NULL)
+		{
+			// ENCRYPT
+			cypher->identity_len = aes_encrypt((unsigned char *)reader->identity, 
+				strlen(reader->identity), key, iv, (unsigned char *)cypher->identity);
+			cypher->username_len = aes_encrypt((unsigned char *)reader->username, 
+				strlen(reader->username), key, iv, (unsigned char *)cypher->username);
+			cypher->password_len = aes_encrypt((unsigned char *)reader->password, 
+				strlen(reader->password), key, iv, (unsigned char *)cypher->password);
+
+			write_file.write((char *) cypher, sizeof(struct binary_reg));
+
+			reader = reader->next;
+		}
+
+		key = (unsigned char *)"";
+		iv = (unsigned char *)"";
 	}
-
-	key = (unsigned char *)"";
-	iv = (unsigned char *)"";
 
 	write_file.close();
 
@@ -91,7 +99,7 @@ list_encrypt(struct binary_reg *head, std::string filename,
 
 void
 list_decrypt(struct binary_reg **head, struct binary_reg **tail,
-	std::string master_key, std::ifstream *read_file)
+	std::string master_key, std::string master_iv, std::ifstream *read_file)
 {
 	// Load the necessary cipher
 	EVP_add_cipher(EVP_aes_256_cbc());
@@ -112,9 +120,16 @@ list_decrypt(struct binary_reg **head, struct binary_reg **tail,
 		master_key = tmp;
 	}
 
-	// a 256 bit key and a 128 bit IV 01234567890123456789012345678901
+	if(master_iv.size() < KEY_SIZE)
+	{
+		std::string tmp = master_iv;
+		master_iv.resize(master_iv.size()+KEY_SIZE);
+		master_iv = tmp;
+	}
+
+	// a 256 bit key and a 128 bit IV 01234567890123456789012345678901-0123456789012345
 	unsigned char *key = (unsigned char *) master_key.c_str();
-	unsigned char *iv = (unsigned char *) "0123456789012345";
+	unsigned char *iv = (unsigned char *) master_iv.c_str();
 
 	while(read_file->read((char *) entry, sizeof(struct binary_reg)))
 	{

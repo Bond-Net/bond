@@ -30,7 +30,6 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 
 	if((*head) == NULL) // first entry
 	{
-		printf("FIRST\n");
 		(*head) = usrinp;
 
 		(*head)->next = NULL;
@@ -42,7 +41,6 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 	}
 	else if(strcmp((*head)->identity, usrinp->identity) >= 0) // head entry
 	{
-		printf("HEAD\n");
 		usrinp->next = (*head); 
 		(*head)->prev = usrinp; 
 		(*head) = usrinp;
@@ -51,7 +49,6 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 	}
 	else if(strcmp((*tail)->identity, usrinp->identity) < 0)  // tail entry
 	{
-		printf("TAIL\n");
 		usrinp->prev = (*tail); 
 		(*tail)->next = usrinp; 
 		(*tail) = usrinp;
@@ -60,7 +57,6 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 	}
 	else // middle entry
 	{
-		printf("MID\n");
 		for(reader = (*head);
 			reader->next != NULL &&
 				strcmp(reader->identity, usrinp->identity) < 0;

@@ -3,24 +3,23 @@
 ![alt text](https://github.com/keybraker/BOND/blob/master/img/bond_logo.png)
 
 As our digital footprints increase by the day, safety is becoming more and more difficult to obtain.<br>
-With [**weBOND**](https://github.com/keybraker/BOND) we try to solve this exact problem, not by adding a 
-third party as a layer of trust, but by giving you the control of  your own security.
+With [**weBOND**](https://github.com/keybraker/BOND) we solve this exact problem, not by adding a 
+third party as a layer of trust, but by giving you the control of your own security.
 
 >Trust is a difficult thing to gain from an individual -especially a stranger- 
-**and with [**weBOND**](https://github.com/keybraker/BOND) you do not have to !**
+**and with [**weBOND**](https://github.com/keybraker/BOND), you do not have to !**
 
 The biggest convinience that password managers have to deliver is, the ability of 
 _cross-platform logins_. But in order to achieve this functionality traditional 
-password managers ask you to trust them. <br>
+password managers ask you to trust them with all your sensitive data.<br>
 With [**weBOND**](https://github.com/keybraker/BOND) you never have to trust anyone 
-but also getting the convinience that _cross-platform logins_ deliver !<br>
+but also get all the convinience that _cross-platform logins_ deliver !<br>
 
-[**weBOND**](https://github.com/keybraker/BOND) can function as a local-device or a 
+
+***
+
+[**weBOND**](https://github.com/keybraker/BOND) can function as a per local-device or a 
 decentralized-online password manager - the choice is yours.<br>
-
-Every user who wants to create bonds, has to allocate a set amount of storage and 
-bandwidth on his device in order to connect to the bond-net. The amount of storage 
-he gives, is the amount of storage he has in the bond-net to store his passwords.<br>
 
 1. Locally [**weBOND**](https://github.com/keybraker/BOND) creates a key-vault with 
 SHA-256 encryption for which only you have the key.

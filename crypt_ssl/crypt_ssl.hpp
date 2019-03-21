@@ -25,10 +25,10 @@ sha256(char *str);
 
 void
 list_encrypt(struct binary_reg *head, std::string filename,
-	char *sha256_key, std::string master_key);
+	char *sha256_key, char *sha256_iv, std::string master_key, std::string master_iv);
 
 void
 list_decrypt(struct binary_reg **head, struct binary_reg **tail,
-	std::string master_key, std::ifstream *file_db);
+	std::string master_key, std::string master_iv, std::ifstream *file_db);
 
 #endif // CRYPT_SSL_H
