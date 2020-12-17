@@ -1,27 +1,70 @@
-COMPILER=g++
-OPENSSLF=-lssl -lcrypto
-STDVERSN=-std=c++11
-FILENAME=-o bond
+SHELL=/bin/bash
 
-LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+CPP = g++
+CCFLAGS = -O3 -pedantic -Wall -Wextra -std=c++1z
+LDLINK= -L/usr/local/opt/openssl@1.1/lib 
+CPPLINK= -I/usr/local/opt/openssl@1.1/include 
+CCLINK = -lssl -lcrypto
+CCNAME = -o BOND
 
-BONDMAIN=src/bond.cpp
-BONDFUNC=src/bond_commands/bond_commands.cpp
-BONDHELP=src/bond_functions/bond_functions.cpp
-CRYPTSSL=src/cryptography/crypt_ssl.cpp
-CRYPTAES=src/cryptography/aes_encrypt.cpp
+ifeq ($(OS), Windows_NT)
+	CCFLAGS += -D WIN32 -fopenmp
+	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
+		CCFLAGS += -D AMD64
+	else
+		ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+			CCFLAGS += -D AMD64
+		endif
+		ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+			CCFLAGS += -D IA32
+		endif
+	endif
+else
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S), Linux)
+		CCFLAGS += -D LINUX -fopenmp
+	endif
+	ifeq ($(UNAME_S), Darwin)
+		CCFLAGS += -D OSX -Xclang -fopenmp 
+		CCLINK += -lomp
+	endif
+	UNAME_P := $(shell uname -p)
+	ifeq ($(UNAME_P), x86_64)
+		CCFLAGS += -D AMD64
+	endif
+	ifneq ($(filter %86,$(UNAME_P)),)
+		CCFLAGS += -D IA32
+	endif
+	ifneq ($(filter arm%,$(UNAME_P)),)
+		CCFLAGS += -D ARM
+	endif
+endif
 
-FILEDIRC=$(BONDMAIN) $(BONDFUNC) $(BONDHELP) \
-	$(CRYPTSSL) $(CRYPTAES) $(LDFLAGS) $(CPPFLAGS)
+OBJ_MAIN = src/bond.o
+OBJ_FUNC = src/bond_commands/bond_commands.o \
+	src/bond_functions/bond_functions.o \
+	src/cryptography/aes_encrypt.o \
+	src/cryptography/crypt_ssl.o
+HDR_MDRZ = src/bond_commands/bond_commands.hpp \
+	src/bond_functions/bond_functions.hpp \
+	src/cryptography/aes_encrypt.hpp \
+	src/cryptography/crypt_ssl.hpp
 
-all:
-	# clear
-	$(info cleared terminal) $(info)
+all: bond
 
-	$(COMPILER) $(FILENAME) $(FILEDIRC) $(OPENSSLF) $(STDVERSN)
-	
-	./bond --f keylist.dat
-	
+bond: $(OBJ_MAIN) $(OBJ_FUNC)
+	$(CPP) $(CCFLAGS) $(CCNAME) \
+	$(OBJ_MAIN) $(OBJ_FUNC) \
+	$(LDLINK) $(CPPLINK) $(CCLINK)
+
+test:
+	mkdir .output
+	./mediarizer -i img -o .output -D -r -p
+	rm -rf .output
+
 clean:
-	bond
+	rm -f BOND src/*.o src/bond_commands/*.o src/bond_functions/*.o \
+	src/archive/*.o src/cryptography/*.o
+
+%.o: %.cpp $(HDR_MDRZ)
+	$(CPP) $(CCFLAGS) $(LDLINK) $(CPPLINK) $(CCLINK) -o $@ -c $<
