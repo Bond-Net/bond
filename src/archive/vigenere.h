@@ -26,7 +26,6 @@ index(char c)
 	return -1;
 }
 
-
 std::string
 extend_key(std::string& msg, std::string& key)
 {

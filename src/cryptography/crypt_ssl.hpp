@@ -14,8 +14,8 @@
 #include <cstring>		//Manipulate c-strings
 #include <sstream>
 
-#include "../crypt_ssl/aes_encrypt.hpp"
-#include "../bond_help/bond_help.hpp"
+#include "../cryptography/aes_encrypt.hpp"
+#include "../bond_functions/bond_functions.hpp"
 
 std::string
 sha256(const std::string str);
