@@ -23,9 +23,11 @@ bool arg_int(int argc, char **argv, std::string *filename, bool *verbose)
 	struct option long_opt[] =
 		{
 			/* These options set a flag. */
-			{"help", no_argument, 0, 'h'},
-			{"verb", no_argument, 0, 'v'},
 			{"file", required_argument, 0, 'f'},
+			{"pass", required_argument, 0, 'p'},
+			{"verbose", no_argument, 0, 'V'},
+			{"help", no_argument, 0, 'h'},
+			{"version", no_argument, 0, 'v'},
 			{0, 0, 0, 0}};
 	/* getopt_long stores the option index here. */
 	int option_index = 0, opt = 0;
@@ -35,9 +37,45 @@ bool arg_int(int argc, char **argv, std::string *filename, bool *verbose)
 		switch (opt)
 		{
 		case 'h':
+			std::cout << "Flags:" << std::endl
+					  << "======" << std::endl
+					  << std::endl
+					  << "flag name  "
+					  << " | flag acronym "
+					  << " | Argument     "
+					  << " | Description                                                              " << std::endl
+					  << "-file      "
+					  << " | -f           "
+					  << " | file         "
+					  << " | key-list file you wish to open                                           " << std::endl
+					  << "-pass      "
+					  << " | -p           "
+					  << " | number       "
+					  << " | returns a strong password with given length                              " << std::endl
+					  << "-verbose   "
+					  << " | -V           "
+					  << " | none         "
+					  << " | executes as normal but with more information                             " << std::endl
+					  << "-help      "
+					  << " | -h           "
+					  << " | none         "
+					  << " | organizes *only* photos                                                  " << std::endl
+					  << "-version   "
+					  << " | -v           "
+					  << " | none         "
+					  << " | returns current builds version                                           " << std::endl
+					  << std::endl;
 			exit(EXIT_SUCCESS);
 
 		case 'v':
+			std::cout << "BOND Version: 0.8.0" << std::endl
+					  << "A project by Keybraker (https://github.com/keybraker)" << std::endl
+					  << "License - Released under the GNU LICENSE (https://www.gnu.org/philosophy/free-sw.html)" << std::endl
+					  << "Copyrights © Keybraker 2020, All rights reserved" << std::endl;
+			*verbose = true;
+			exit(EXIT_SUCCESS);
+
+		case 'V':
 			*verbose = true;
 			break;
 
@@ -45,8 +83,14 @@ bool arg_int(int argc, char **argv, std::string *filename, bool *verbose)
 			*filename = optarg;
 			break;
 
-		default:
+		case 0:
 			break;
+		case '?':
+			std::cout << "there was an error with given flags" << std::endl;
+			return EXIT_FAILURE;
+		default:
+			std::cout << "there was an error with given flags" << std::endl;
+			return EXIT_FAILURE;
 		}
 	}
 
