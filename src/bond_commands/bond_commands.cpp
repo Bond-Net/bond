@@ -1,4 +1,4 @@
-#include "bond_func.hpp"
+#include "bond_commands.hpp"
 
 #define BOLD_ON	 	"\e[1m"
 #define BOLD_OFF	"\e[0m"

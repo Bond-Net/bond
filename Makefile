@@ -3,14 +3,17 @@ OPENSSLF=-lssl -lcrypto
 STDVERSN=-std=c++11
 FILENAME=-o bond
 
-BONDMAIN=bond.cpp
-BONDFUNC=bond_func/bond_func.cpp
-BONDHELP=bond_help/bond_help.cpp
-CRYPTSSL=crypt_ssl/crypt_ssl.cpp
-CRYPTAES=crypt_ssl/aes_encrypt.cpp
-PASSREAD=pass_read/pass_read.cpp
+LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
+CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
 
-FILEDIRC=$(BONDMAIN) $(BONDFUNC) $(BONDHELP) $(PASSREAD) $(CRYPTSSL) $(CRYPTAES)
+BONDMAIN=src/bond.cpp
+BONDFUNC=src/bond_commands/bond_commands.cpp
+BONDHELP=src/bond_functions/bond_functions.cpp
+CRYPTSSL=src/cryptography/crypt_ssl.cpp
+CRYPTAES=src/cryptography/aes_encrypt.cpp
+
+FILEDIRC=$(BONDMAIN) $(BONDFUNC) $(BONDHELP) \
+	$(CRYPTSSL) $(CRYPTAES) $(LDFLAGS) $(CPPFLAGS)
 
 all:
 	# clear

@@ -1,4 +1,4 @@
-#include "pass_gen.hpp"
+#include "password_generator.hpp"
 
 void 
 Passgen::printPass(bool outMeta)

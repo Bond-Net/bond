@@ -1,18 +1,18 @@
-#ifndef _pass_gen_H_
-#define _pass_gen_H_
+#ifndef _password_generator_H_
+#define _password_generator_H_
 
 #include <iostream> //Input-output
 #include <random> //PRNG stuff
 #include <algorithm> //Transform function
 
-class pass_gen 
+class password_generator 
 {
 	public:
-		pass_gen();
-		~pass_gen();
+		password_generator();
+		~password_generator();
 
 		//length, amount, lowercase, uppercase, symbols
-		pass_gen(int len, int amt, bool smA, bool lgA, bool sym);
+		password_generator(int len, int amt, bool smA, bool lgA, bool sym);
 
 		//Outputs value to standard out
 		std::string printPass(bool outMeta);
@@ -26,7 +26,7 @@ class pass_gen
 		bool symbols;
 };
 
-pass_gen::pass_gen()
+password_generator::password_generator()
 {
 	length = 8;
 	amount = 1;
@@ -35,7 +35,7 @@ pass_gen::pass_gen()
 	symbols = false;
 }
 
-pass_gen::pass_gen(int len, int amt, bool smA, bool lgA, bool sym)
+password_generator::password_generator(int len, int amt, bool smA, bool lgA, bool sym)
 {
 	if (len < 6) length = 6;
 	else if (len > 256) length = 256;
@@ -50,13 +50,13 @@ pass_gen::pass_gen(int len, int amt, bool smA, bool lgA, bool sym)
 	symbols = sym;
 }
 
-pass_gen::~pass_gen()
+password_generator::~password_generator()
 {
 	//Nothing to destroy, vectors are magic
 }
 
 std::string
-pass_gen::printPass(bool outMeta)
+password_generator::printPass(bool outMeta)
 {
 	if (length > 1 && outMeta)
 		printMeta();
@@ -123,7 +123,7 @@ pass_gen::printPass(bool outMeta)
 	return "";
 }
 
-void pass_gen::printMeta()
+void password_generator::printMeta()
 {
 	std::cout	<< "PasswordGenerator | length: "
 				<< length << " | amount: " << amount << "\n";
@@ -135,4 +135,4 @@ void pass_gen::printMeta()
 
 
 
-#endif //_pass_gen_H_
+#endif //_password_generator_H_
