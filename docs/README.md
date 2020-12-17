@@ -131,9 +131,8 @@ TBI
 
 ## Acknowledgements
 
-> Acknowledgments - _[Exiv2](https://github.com/exiv2/exiv2)_<br>
 > Author - **Ioannis Tsiakkas** - _[Keybraker](https://github.com/keybraker)_<br>
 > License - _[GNU LICENSE](http://www.gnu.org/philosophy/free-sw.html)_<br>
 
-Copyrights © Keybraker 2020 [Mediarizer](https://github.com/keybraker/Media-Organizer), All rights reserved
+Copyrights © Keybraker 2020 [BOND](https://github.com/keybraker/BOND), All rights reserved
 
