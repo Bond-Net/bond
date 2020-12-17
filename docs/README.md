@@ -19,12 +19,7 @@
    1. [Run](#4-1)
    1. [Commands](#4-2)
    2. [Flags](#4-3)
-5. [Graphical User Interface](#5)
-   1. [GUI Installation](#5-1)
-   2. [GUI Description](#5-2)
-6. [Information](#6)
-   1. [Release History](#6-1)
-   2. [Acknowledgements](#6-2)
+5. [Acknowledgements](#5)
 
 <div id="1">
 
@@ -128,8 +123,17 @@ The first time you run BOND you will have no key list so you have to make one by
 
 <div id="4-3">
 
-### Commands
-
 ### Flags
 
 TBI
+
+<div id="5">
+
+## Acknowledgements
+
+> Acknowledgments - _[Exiv2](https://github.com/exiv2/exiv2)_<br>
+> Author - **Ioannis Tsiakkas** - _[Keybraker](https://github.com/keybraker)_<br>
+> License - _[GNU LICENSE](http://www.gnu.org/philosophy/free-sw.html)_<br>
+
+Copyrights © Keybraker 2020 [Mediarizer](https://github.com/keybraker/Media-Organizer), All rights reserved
+
