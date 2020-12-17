@@ -35,16 +35,13 @@ bool arg_int(int argc, char **argv, std::string *filename, bool *verbose)
 		switch (opt)
 		{
 		case 'h':
-			prnt_inf("HELP");
 			exit(EXIT_SUCCESS);
 
 		case 'v':
-			prnt_inf("VERBOSE");
 			*verbose = true;
 			break;
 
 		case 'f':
-			prnt_inf("file is read");
 			*filename = optarg;
 			break;
 

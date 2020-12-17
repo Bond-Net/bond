@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
 
 				if (sha256(master_key = get_pass(true)) != sha256_key)
 				{
-					std::cout << bold_on << "incorrect password, try again"
-							  << bold_re << std::endl
+					std::cout << "incorrect password, try again"
+							  << std::endl
 							  << std::endl;
 					continue;
 				}
@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
 
 				if (sha256(master_iv = get_pass(true)) != sha256_iv)
 				{
-					std::cout << bold_on << "incorrect iv, try again"
-							  << bold_re << std::endl
+					std::cout << "incorrect iv, try again"
+							  << std::endl
 							  << std::endl;
 					continue;
 				}
@@ -104,8 +104,8 @@ int main(int argc, char *argv[])
 			std::cout << "> re-enter master key:\t";
 			if (sha256((master_key = get_pass(true))) != sha256_key)
 			{
-				std::cout << bold_on << "(your passwords did not match, please retry)"
-						  << bold_re << std::endl
+				std::cout << "(your passwords did not match, please retry)"
+						  << std::endl
 						  << std::endl;
 				continue;
 			}
@@ -119,8 +119,8 @@ int main(int argc, char *argv[])
 			sha256_iv = sha256(master_iv = get_pass(true));
 			if (sha256_key == sha256_iv)
 			{
-				std::cout << bold_on << "(your iv is the same with key, please retry)"
-						  << bold_re << std::endl
+				std::cout << "(your iv is the same with key, please retry)"
+						  << std::endl
 						  << std::endl;
 				continue;
 			}
@@ -128,8 +128,8 @@ int main(int argc, char *argv[])
 			std::cout << "> re-enter master iv:\t";
 			if (sha256((master_iv = get_pass(true))) != sha256_iv)
 			{
-				std::cout << bold_on << "(your ivs did not match, please retry)"
-						  << bold_re << std::endl
+				std::cout << "(your ivs did not match, please retry)"
+						  << std::endl
 						  << std::endl;
 				continue;
 			}
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
 	while (true)
 	{
-		std::cout << "\n" bold_on "command: " bold_re;
+		std::cout << "\ncommand: ";
 		std::cin >> msg;
 
 		if (msg == "exit" || msg == "quit" || msg == "q")

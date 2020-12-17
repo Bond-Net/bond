@@ -16,26 +16,6 @@
 
 #include <termios.h>
 
-#define a_c_r "\x1b[31m"
-#define a_c_g "\x1b[32m"
-#define a_c_y "\x1b[33m"
-#define a_c_b "\x1b[34m"
-#define a_c_m "\x1b[35m"
-#define a_c_c "\x1b[36m"
-#define a_c_re "\x1b[0m"
-#define under "\e[4m"
-#define under_re "\e[0m"
-#define italic "\e[3m"
-#define italic_re "\e[0m"
-#define bold_on "\e[1m"
-#define bold_re "\e[0m"
-
-#define prnt_inf(MSG)                                                        \
-	{                                                                        \
-		fprintf(stderr, "MESSG: " a_c_y "%-60s" a_c_re " | [%-20s, %-5d]\n", \
-				std::string(MSG).c_str(), __FILE__, __LINE__);               \
-	}
-
 typedef struct binary_reg
 {
 	char identity[128];
