@@ -1,7 +1,7 @@
 <div id="1">
   
 # [BOND](https://github.com/keybraker/BOND)
-![alt text](../img/bond.logo.svg)
+![alt text](../img/bond_logo.svg)
 <br>
 
 ---
