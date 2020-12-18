@@ -29,10 +29,11 @@ bool arg_int(int argc, char **argv, std::string *filename, bool *verbose)
 			{"help", no_argument, 0, 'h'},
 			{"version", no_argument, 0, 'v'},
 			{0, 0, 0, 0}};
+
 	/* getopt_long stores the option index here. */
 	int option_index = 0, opt = 0;
 
-	while ((opt = getopt_long(argc, argv, "hvf:c:", long_opt, &option_index)) != -1)
+	while ((opt = getopt_long(argc, argv, "fp:hvV", long_opt, &option_index)) != -1)
 	{
 		switch (opt)
 		{
@@ -85,9 +86,11 @@ bool arg_int(int argc, char **argv, std::string *filename, bool *verbose)
 
 		case 0:
 			break;
+
 		case '?':
 			std::cout << "there was an error with given flags" << std::endl;
 			return EXIT_FAILURE;
+
 		default:
 			std::cout << "there was an error with given flags" << std::endl;
 			return EXIT_FAILURE;

@@ -15,16 +15,33 @@
 #include <openssl/aes.h>
 #include <openssl/sha.h>
 
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "bond_commands/bond_commands.hpp"
 #include "bond_functions/bond_functions.hpp"
 #include "cryptography/crypt_ssl.hpp"
 
+void my_handler(int s)
+{
+	std::cout << "signal is: " << s << std::endl;
+	std::cout.flush();
+	std::string overwrite;
+	std::cout << "\nbond>> any unsaved data will be lost, do you want to quit? [y/n]" << std::endl;
+	std::cin >> overwrite;
+	if (overwrite == "y")
+		exit(EXIT_SUCCESS);
+	else
+		std::cin.ignore(INT_MAX);
+}
+
 int main(int argc, char *argv[])
 {
 	std::string msg, filename, master_key, master_iv, sha256_key, sha256_iv;
-
 	char sha256_key_c[128], sha256_iv_c[128];
 	struct binary_reg *head = NULL, *tail = NULL;
+	struct sigaction sigIntHandler;
 	bool verbose = false;
 
 	arg_int(argc, argv, &filename, &verbose);
@@ -90,6 +107,11 @@ int main(int argc, char *argv[])
 
 		file_db.close();
 	}
+	else if (filename.size())
+	{
+		std::cout << "key-list " << filename << ", does not exist" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	else
 	{
 		std::cout << "It seems like you have no key list." << std::endl
@@ -138,10 +160,16 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	sigIntHandler.sa_handler = my_handler;
+	sigemptyset(&sigIntHandler.sa_mask);
+	sigIntHandler.sa_flags = 0;
+	sigaction(SIGINT, &sigIntHandler, NULL);
+
 	while (true)
 	{
-		std::cout << "\ncommand: ";
+		std::cout << "bond>> ";
 		std::cin >> msg;
+		std::cout << "msg: " << msg << std::endl;
 
 		if (msg == "exit" || msg == "quit" || msg == "q")
 		{
@@ -232,5 +260,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	pause();
 	exit(EXIT_SUCCESS);
 }

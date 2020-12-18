@@ -41,8 +41,22 @@ void
 list_encrypt(struct binary_reg *head, std::string filename,
 	char *sha256_key, char *sha256_iv, std::string master_key, std::string master_iv)
 {
+	while (filename.size() == 0 || file_exists(filename + ".dat") == true)
+	{
+		std::cout << "bond>> enter key-list name (without .dat)" << std::endl;
+		std::cin >> filename;
+
+		if (file_exists(filename + ".dat")) {
+			std::string overwrite;
+			std::cout << "bond>> file already exists, do you want to overwrite it? [y/n]" << std::endl;
+			std::cin >> overwrite;
+			if (overwrite == "y")
+				break;
+		}
+	}
+
 	// creating new keyvault which begins with the hash of the code
-	std::ofstream write_file("new_keylist.dat", std::ios::out | std::ios::binary);
+	std::ofstream write_file(filename + ".dat", std::ios::out | std::ios::binary);
 	write_file.write(sha256_key, sizeof(char) * 128);
 	write_file.write(sha256_iv, sizeof(char) * 128);
 	
