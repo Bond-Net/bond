@@ -19,10 +19,10 @@ bool insert(struct binary_reg **head, struct binary_reg **tail)
 	struct binary_reg *usrinp = (struct binary_reg *)malloc(sizeof(binary_reg));
 	struct binary_reg *reader;
 
-	std::cout << "\nenter <new identity> <new username> <new password>: ";
+	std::cout << "enter <new identity> <new username> <new password>: ";
 	std::cin >> usrinp->identity >> usrinp->username >> usrinp->password;
 
-	if((*head) == NULL) // first entry
+	if ((*head) == NULL) // first entry
 	{
 		(*head) = usrinp;
 
@@ -77,57 +77,62 @@ bool delete_pass(struct binary_reg **head, struct binary_reg **tail)
 	}
 	else
 	{
-		struct binary_reg *usrinp = (struct binary_reg *)malloc(sizeof(binary_reg));
+		int user_input = -1;
 		struct binary_reg *reader = (*head);
 
-		std::cout << "\nenter <identity> <username> of the "
-				  << "password you want to delete: ";
-		std::cin >> usrinp->identity >> usrinp->username;
+		std::cout << "enter <index> of the password you want to delete: ";
+		std::cin >> user_input;
 
-		if (strcmp((*head)->identity, usrinp->identity) == 0 &&
-			strcmp((*head)->username, usrinp->username) == 0) // head deletion
+		for (int i = 1; reader != NULL; i++, reader = reader->next)
 		{
-			if ((*head) == (*tail))
+			std::cout << i << " == " << user_input << std::endl;
+			if (i == user_input)
 			{
-				free((*head));
-				(*head) = (*tail) = NULL;
-			}
-			else
-			{
-				(*head) = (*head)->next;
-				free((*head)->prev);
-				(*head)->prev = NULL;
-
-				return true;
-			}
-		}
-		else if (strcmp((*tail)->identity, usrinp->identity) == 0 && strcmp((*tail)->username, usrinp->username) == 0) // tail deletion
-		{
-			(*tail)->prev->next = NULL;
-			(*tail) = (*tail)->prev;
-			free((*tail)->next);
-
-			return true;
-		}
-		else // middle deletion
-		{
-			for (reader = (*head);
-				 reader->next != NULL;
-				 reader = reader->next)
-			{
-				if (strcmp(reader->identity, usrinp->identity) == 0 &&
-					strcmp(reader->username, usrinp->username) == 0)
+				std::string overwrite;
+				std::cout << "\nbond> are you sure you want to delete entry: "
+						  << reader->identity << ", " << reader->username << ", "
+						  << reader->password << "? [y/n]" << std::endl;
+				std::cin >> overwrite;
+				if (overwrite == "y")
 				{
-					reader->prev->next = reader->next;
-					reader->next->prev = reader->prev;
+					if ((*head) == (reader)) // head deletion
+					{
+						if ((*head) == (*tail))
+						{
+							free((*head));
+							(*head) = (*tail) = NULL;
+						}
+						else
+						{
+							(*head) = (*head)->next;
+							free((*head)->prev);
+							(*head)->prev = NULL;
 
-					free(reader);
-					return true;
+							return true;
+						}
+					}
+					else if ((*tail) == (reader)) // tail deletion
+					{
+						(*tail)->prev->next = NULL;
+						(*tail) = (*tail)->prev;
+						free((*tail)->next);
+
+						return true;
+					}
+					else // middle deletion
+					{
+						reader->prev->next = reader->next;
+						reader->next->prev = reader->prev;
+						free(reader);
+
+						return true;
+					}
 				}
+				break;
 			}
 		}
 
-		std::cout << "Did not find entry" << std::endl;
+		std::cout << "no entry with given index" << std::endl;
 	}
 
 	return false;
@@ -142,14 +147,12 @@ bool list_all(struct binary_reg *head)
 	}
 	else
 	{
-		struct binary_reg *reader = head;
+		printf("%-3s %-25s %-25s %-25s\n", "idx", "identity", "username", "password");
 		int i = 0;
-		while (reader != NULL)
+		for (struct binary_reg *reader = head; reader != NULL; i++, reader = reader->next)
 		{
-			printf("%-3d identity: %-25s username: %-25s password: |%-25s|\n",
-				   ++i, reader->identity, reader->username, reader->password);
-
-			reader = reader->next;
+			printf("%-3d %-25s %-25s %-25s\n",
+				   i, reader->identity, reader->username, reader->password);
 		}
 	}
 

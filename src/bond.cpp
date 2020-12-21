@@ -27,7 +27,7 @@
 void my_handler(int s)
 {
 	std::string overwrite;
-	std::cout << "\nbond>> any unsaved data will be lost, do you want to quit? [y/n]" << std::endl;
+	std::cout << "\nbond> any unsaved data will be lost, do you want to quit? [y/n]" << std::endl;
 	std::cin >> overwrite;
 	if (overwrite == "y")
 		exit(EXIT_SUCCESS);
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
 	while (true)
 	{
-		std::cout << "bond>> ";
+		std::cout << "bond> ";
 		std::cin >> msg;
 
 		if (msg == "exit" || msg == "quit" || msg == "q")
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
 			std::cout << "clearing" << std::flush;
 			std::cout.flush();
 		}
-		else
+		else if (msg == "help" || msg == "h")
 		{
 			printf(
 				"Usage: ./bond <command>, commands are:\n"
@@ -275,6 +275,8 @@ int main(int argc, char *argv[])
 				"\tlist-all\n"
 				"\tlist-from\n"
 				"\treset\n");
+		} else {
+			printf("unknown command, type help for more information\n");
 		}
 	}
 	exit(EXIT_SUCCESS);

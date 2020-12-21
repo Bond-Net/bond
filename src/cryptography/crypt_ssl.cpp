@@ -43,14 +43,14 @@ void list_encrypt(struct binary_reg *head, std::string filename,
 	if(file_exists(filename) != true) {
 		while (filename.size() == 0 || file_exists(filename) == true)
 		{
-			std::cout << "bond>> enter key-list name (without .dat)" << std::endl;
+			std::cout << "bond> enter key-list name (without .dat)" << std::endl;
 			std::cin >> filename;
 			filename += ".dat";
 
 			if (file_exists(filename))
 			{
 				std::string overwrite;
-				std::cout << "bond>> file already exists, do you want to overwrite it?` [y/n]" << std::endl;
+				std::cout << "bond> file already exists, do you want to overwrite it?` [y/n]" << std::endl;
 				std::cin >> overwrite;
 				if (overwrite == "y")
 					break;
