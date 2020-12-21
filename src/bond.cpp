@@ -9,6 +9,7 @@
 #include <fstream> //File I/O
 #include <iomanip> //Convenient spacing
 #include <cstring> //Manipulate c-strings
+#include <regex>
 
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
@@ -25,8 +26,6 @@
 
 void my_handler(int s)
 {
-	std::cout << "signal is: " << s << std::endl;
-	std::cout.flush();
 	std::string overwrite;
 	std::cout << "\nbond>> any unsaved data will be lost, do you want to quit? [y/n]" << std::endl;
 	std::cin >> overwrite;
@@ -34,6 +33,16 @@ void my_handler(int s)
 		exit(EXIT_SUCCESS);
 	else
 		std::cin.ignore(INT_MAX);
+}
+
+bool is_bat(std::string file_name)
+{
+	std::regex rx("^.*\\.dat$");
+	if (std::regex_match(file_name, rx))
+	{
+		return true;
+	}
+	return false;
 }
 
 int main(int argc, char *argv[])
@@ -48,8 +57,13 @@ int main(int argc, char *argv[])
 
 	if (file_exists(filename))
 	{
+		if (!is_bat(filename))
+		{
+			std::cout << "key-list is always .dat file"
+					  << std::endl;
+			exit(EXIT_FAILURE);
+		}
 		std::cout << "Enter the master key in order to open the vault: "
-				  << std::endl
 				  << std::endl;
 
 		std::ifstream file_db(filename, std::ios::in | std::ios::binary);
@@ -163,13 +177,12 @@ int main(int argc, char *argv[])
 	sigIntHandler.sa_handler = my_handler;
 	sigemptyset(&sigIntHandler.sa_mask);
 	sigIntHandler.sa_flags = 0;
-	sigaction(SIGINT, &sigIntHandler, NULL);
+	sigaction(SIGSYS, &sigIntHandler, NULL);
 
 	while (true)
 	{
 		std::cout << "bond>> ";
 		std::cin >> msg;
-		std::cout << "msg: " << msg << std::endl;
 
 		if (msg == "exit" || msg == "quit" || msg == "q")
 		{
@@ -246,6 +259,11 @@ int main(int argc, char *argv[])
 				std::cout << "you do not have a key list" << std::endl;
 			}
 		}
+		else if (msg == "clear")
+		{
+			std::cout << "clearing" << std::flush;
+			std::cout.flush();
+		}
 		else
 		{
 			printf(
@@ -259,7 +277,5 @@ int main(int argc, char *argv[])
 				"\treset\n");
 		}
 	}
-
-	pause();
 	exit(EXIT_SUCCESS);
 }

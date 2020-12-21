@@ -6,8 +6,7 @@ bool file_exists(const std::string &name)
 	return (stat(name.c_str(), &buffer) == 0);
 }
 
-FILE *
-file_open(std::string file, std::string type)
+FILE *file_open(std::string file, std::string type)
 {
 	FILE *file_db = fopen(file.c_str(), type.c_str());
 	if (file_db == NULL)

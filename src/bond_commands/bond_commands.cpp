@@ -12,13 +12,11 @@ typedef struct binary_reg
 
 	struct binary_reg *next;
 	struct binary_reg *prev;
-}
-binary_reg;
+} binary_reg;
 
-bool
-insert(struct binary_reg **head, struct binary_reg **tail)
+bool insert(struct binary_reg **head, struct binary_reg **tail)
 {
-	struct binary_reg *usrinp = (struct binary_reg *) malloc (sizeof(binary_reg));
+	struct binary_reg *usrinp = (struct binary_reg *)malloc(sizeof(binary_reg));
 	struct binary_reg *reader;
 
 	std::cout << "\nenter <new identity> <new username> <new password>: ";
@@ -35,28 +33,29 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 
 		return true;
 	}
-	else if(strcmp((*head)->identity, usrinp->identity) >= 0) // head entry
+	else if (strcmp((*head)->identity, usrinp->identity) >= 0) // head entry
 	{
-		usrinp->next = (*head); 
-		(*head)->prev = usrinp; 
+		usrinp->next = (*head);
+		(*head)->prev = usrinp;
 		(*head) = usrinp;
 
 		return true;
 	}
-	else if(strcmp((*tail)->identity, usrinp->identity) < 0)  // tail entry
+	else if (strcmp((*tail)->identity, usrinp->identity) < 0) // tail entry
 	{
-		usrinp->prev = (*tail); 
-		(*tail)->next = usrinp; 
+		usrinp->prev = (*tail);
+		(*tail)->next = usrinp;
 		(*tail) = usrinp;
 
 		return true;
 	}
 	else // middle entry
 	{
-		for(reader = (*head);
-			reader->next != NULL &&
-				strcmp(reader->identity, usrinp->identity) < 0;
-			reader = reader->next);
+		for (reader = (*head);
+			 reader->next != NULL &&
+			 strcmp(reader->identity, usrinp->identity) < 0;
+			 reader = reader->next)
+			;
 
 		usrinp->next = reader;
 		usrinp->prev = reader->prev;
@@ -70,26 +69,25 @@ insert(struct binary_reg **head, struct binary_reg **tail)
 	return false;
 }
 
-bool
-delete_pass(struct binary_reg **head, struct binary_reg **tail)
+bool delete_pass(struct binary_reg **head, struct binary_reg **tail)
 {
-	if((*head) == NULL)
+	if ((*head) == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
 	}
 	else
 	{
-		struct binary_reg *usrinp = (struct binary_reg *) malloc (sizeof(binary_reg));
+		struct binary_reg *usrinp = (struct binary_reg *)malloc(sizeof(binary_reg));
 		struct binary_reg *reader = (*head);
 
-		std::cout	<< "\nenter <identity> <username> of the "
-					<<"password you want to delete: ";
+		std::cout << "\nenter <identity> <username> of the "
+				  << "password you want to delete: ";
 		std::cin >> usrinp->identity >> usrinp->username;
 
-		if(strcmp((*head)->identity, usrinp->identity) == 0 &&
+		if (strcmp((*head)->identity, usrinp->identity) == 0 &&
 			strcmp((*head)->username, usrinp->username) == 0) // head deletion
 		{
-			if((*head) == (*tail))
+			if ((*head) == (*tail))
 			{
 				free((*head));
 				(*head) = (*tail) = NULL;
@@ -97,14 +95,13 @@ delete_pass(struct binary_reg **head, struct binary_reg **tail)
 			else
 			{
 				(*head) = (*head)->next;
-				free((*head)->prev);	
+				free((*head)->prev);
 				(*head)->prev = NULL;
 
 				return true;
 			}
 		}
-		else if(strcmp((*tail)->identity, usrinp->identity) == 0
-			&& strcmp((*tail)->username, usrinp->username) == 0) // tail deletion
+		else if (strcmp((*tail)->identity, usrinp->identity) == 0 && strcmp((*tail)->username, usrinp->username) == 0) // tail deletion
 		{
 			(*tail)->prev->next = NULL;
 			(*tail) = (*tail)->prev;
@@ -113,14 +110,14 @@ delete_pass(struct binary_reg **head, struct binary_reg **tail)
 			return true;
 		}
 		else // middle deletion
-		{	
-			for(reader = (*head);
-				reader->next != NULL;
-				reader = reader->next)
+		{
+			for (reader = (*head);
+				 reader->next != NULL;
+				 reader = reader->next)
 			{
-				if(strcmp(reader->identity, usrinp->identity) == 0 &&
+				if (strcmp(reader->identity, usrinp->identity) == 0 &&
 					strcmp(reader->username, usrinp->username) == 0)
-				{					
+				{
 					reader->prev->next = reader->next;
 					reader->next->prev = reader->prev;
 
@@ -136,10 +133,9 @@ delete_pass(struct binary_reg **head, struct binary_reg **tail)
 	return false;
 }
 
-bool
-list_all(struct binary_reg *head)
+bool list_all(struct binary_reg *head)
 {
-	if(head == NULL)
+	if (head == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
 		return false;
@@ -147,12 +143,11 @@ list_all(struct binary_reg *head)
 	else
 	{
 		struct binary_reg *reader = head;
-		while(reader != NULL)
+		int i = 0;
+		while (reader != NULL)
 		{
-			printf("identity: %-25s username: "
-				"%-25s password: "
-				"%-25s\n",
-				reader->identity, reader->username, reader->password);
+			printf("%-3d identity: %-25s username: %-25s password: |%-25s|\n",
+				   ++i, reader->identity, reader->username, reader->password);
 
 			reader = reader->next;
 		}
@@ -161,10 +156,9 @@ list_all(struct binary_reg *head)
 	return true;
 }
 
-bool
-list_from(struct binary_reg *head)
+bool list_from(struct binary_reg *head)
 {
-	if(head == NULL)
+	if (head == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
 		return false;
@@ -174,18 +168,18 @@ list_from(struct binary_reg *head)
 		char msg[128];
 
 		std::cout << "\nenter <identity> you want "
-			"to see credentials: ";
+					 "to see credentials: ";
 		std::cin >> msg;
 
 		struct binary_reg *reader = head;
-		while(reader != NULL)
+		while (reader != NULL)
 		{
-			if(strcmp(reader->identity, msg) != 0)
+			if (strcmp(reader->identity, msg) != 0)
 			{
 				printf("identity: %-25s username: "
-					"%-25s password: "
-					"%-25s\n",
-					reader->identity, reader->username, reader->password);
+					   "%-25s password: "
+					   "%-25s\n",
+					   reader->identity, reader->username, reader->password);
 			}
 			reader = reader->next;
 		}
@@ -194,10 +188,9 @@ list_from(struct binary_reg *head)
 	return true;
 }
 
-bool
-edit(struct binary_reg *head)
+bool edit(struct binary_reg *head)
 {
-	if(head == NULL)
+	if (head == NULL)
 	{
 		std::cout << "your key list is empty" << std::endl;
 		return true;
@@ -207,13 +200,13 @@ edit(struct binary_reg *head)
 		char usr_msg2[128], usr_msg3[128], usr_msg4[128];
 
 		std::cout << "\nenter <identity> <username> "
-			"<new password> you want to edit: ";
+					 "<new password> you want to edit: ";
 		std::cin >> usr_msg2 >> usr_msg3 >> usr_msg4;
 
 		struct binary_reg *reader = head;
-		while(reader != NULL)
+		while (reader != NULL)
 		{
-			if(strcmp(reader->identity, usr_msg2) == 0 &&
+			if (strcmp(reader->identity, usr_msg2) == 0 &&
 				strcmp(reader->username, usr_msg3) == 0)
 			{
 				strcpy(reader->password, usr_msg4);
