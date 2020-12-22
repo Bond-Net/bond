@@ -47,10 +47,10 @@ bool is_bat(std::string file_name)
 
 int main(int argc, char *argv[])
 {
+	// struct sigaction sigIntHandler;
 	std::string msg, filename, master_key, master_iv, sha256_key, sha256_iv;
 	char sha256_key_c[128], sha256_iv_c[128];
 	struct binary_reg *head = NULL, *tail = NULL;
-	struct sigaction sigIntHandler;
 	bool verbose = false;
 
 	arg_int(argc, argv, &filename, &verbose);
@@ -128,56 +128,71 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		std::cout << "It seems like you have no key list." << std::endl
-				  << "Enter your new master key (remember to write it down)"
-				  << std::endl;
+		std::cout << "1. sha256_key:\t"
+				  << "|" << sha256_key << "|" << std::endl;
+		std::cout << "1. sha256_iv:\t"
+				  << "|" << sha256_iv << "|" << std::endl;
 
-		while (true)
-		{
-			std::cout << "> enter master key:\t";
-			sha256_key = sha256(get_pass(true));
+		get_master(sha256_key, sha256_iv);
+		// while (true)
+		// {
+		// 	std::cout << "enter master key:\t";
+		// 	sha256_key = sha256(get_pass(true));
 
-			std::cout << "> re-enter master key:\t";
-			if (sha256((master_key = get_pass(true))) != sha256_key)
-			{
-				std::cout << "(your passwords did not match, please retry)"
-						  << std::endl
-						  << std::endl;
-				continue;
-			}
+		// 	std::cout << "re-enter master key:\t";
+		// 	if (sha256((master_key = get_pass(true))) != sha256_key)
+		// 	{
+		// 		std::cout << "(your passwords did not match, please retry)"
+		// 				  << std::endl
+		// 				  << std::endl;
 
-			break;
-		}
+		// 		continue;
+		// 	}
 
-		while (true)
-		{
-			std::cout << "> enter master iv:\t";
-			sha256_iv = sha256(master_iv = get_pass(true));
-			if (sha256_key == sha256_iv)
-			{
-				std::cout << "(your iv is the same with key, please retry)"
-						  << std::endl
-						  << std::endl;
-				continue;
-			}
+		// 	break;
+		// }
 
-			std::cout << "> re-enter master iv:\t";
-			if (sha256((master_iv = get_pass(true))) != sha256_iv)
-			{
-				std::cout << "(your ivs did not match, please retry)"
-						  << std::endl
-						  << std::endl;
-				continue;
-			}
+		// while (true)
+		// {
+		// 	std::cout << "enter master iv:\t";
+		// 	sha256_iv = sha256(master_iv = get_pass(true));
+		// 	if (sha256_key == sha256_iv)
+		// 	{
+		// 		std::cout << "(your iv is the same with key, please retry)"
+		// 				  << std::endl
+		// 				  << std::endl;
 
-			break;
-		}
+		// 		continue;
+		// 	}
+
+		// 	std::cout << "re-enter master iv:\t";
+		// 	if (sha256((master_iv = get_pass(true))) != sha256_iv)
+		// 	{
+		// 		std::cout << "(your ivs did not match, please retry)"
+		// 				  << std::endl
+		// 				  << std::endl;
+
+		// 		continue;
+		// 	}
+
+		// 	break;
+		// }
+
+		std::cout << "2. sha256_key:\t"
+				  << "|" << sha256_key << "|" << std::endl;
+		std::cout << "2. sha256_iv:\t"
+				  << "|" << sha256_iv << "|" << std::endl;
+
+		std::cout << "3. (char *)sha256_key.c_str():\t"
+				  << "|" << (char *)sha256_key.c_str() << "|" << std::endl;
+		std::cout << "3. (char *)sha256_iv.c_str():\t"
+				  << "|" << (char *)sha256_iv.c_str() << "|" << std::endl;
 	}
 
-	sigIntHandler.sa_handler = my_handler;
-	sigemptyset(&sigIntHandler.sa_mask);
-	sigIntHandler.sa_flags = 0;
-	sigaction(SIGSYS, &sigIntHandler, NULL);
+	// sigIntHandler.sa_handler = my_handler;
+	// sigemptyset(&sigIntHandler.sa_mask);
+	// sigIntHandler.sa_flags = 0;
+	// sigaction(SIGSYS, &sigIntHandler, NULL);
 
 	while (true)
 	{
@@ -239,7 +254,7 @@ int main(int argc, char *argv[])
 		}
 		else if (msg == "list-from" || msg == "lsf")
 		{
-			if (file_exists(filename))
+			if (head != NULL)
 			{
 				list_from(head);
 			}
@@ -264,6 +279,14 @@ int main(int argc, char *argv[])
 			std::cout << "clearing" << std::flush;
 			std::cout.flush();
 		}
+		else if (msg == "change-master")
+		{
+			std::cout << "1 sha256_key: " << sha256_key << std::endl;
+			std::cout << "1 sha256_iv: " << sha256_iv << std::endl;
+			change_master(sha256_key, sha256_iv);
+			std::cout << "2 sha256_key: " << sha256_key << std::endl;
+			std::cout << "2 sha256_iv: " << sha256_iv << std::endl;
+		}
 		else if (msg == "help" || msg == "h")
 		{
 			printf(
@@ -274,8 +297,11 @@ int main(int argc, char *argv[])
 				"\tedit\n"
 				"\tlist-all\n"
 				"\tlist-from\n"
+				"\tchange-master\n"
 				"\treset\n");
-		} else {
+		}
+		else
+		{
 			printf("unknown command, type help for more information\n");
 		}
 	}

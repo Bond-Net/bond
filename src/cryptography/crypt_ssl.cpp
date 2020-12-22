@@ -37,10 +37,11 @@ sha256(char *str)
 	return str_hash;
 }
 
-void list_encrypt(struct binary_reg *head, std::string filename,
-				  char *sha256_key, char *sha256_iv, std::string master_key, std::string master_iv)
+void list_encrypt(struct binary_reg *head, std::string filename, char *sha256_key,
+				  char *sha256_iv, std::string master_key, std::string master_iv)
 {
-	if(file_exists(filename) != true) {
+	if (file_exists(filename) != true)
+	{
 		while (filename.size() == 0 || file_exists(filename) == true)
 		{
 			std::cout << "bond> enter key-list name (without .dat)" << std::endl;
@@ -50,7 +51,7 @@ void list_encrypt(struct binary_reg *head, std::string filename,
 			if (file_exists(filename))
 			{
 				std::string overwrite;
-				std::cout << "bond> file already exists, do you want to overwrite it?` [y/n]" << std::endl;
+				std::cout << "bond> file already exists, do you want to overwrite it? [y/n]" << std::endl;
 				std::cin >> overwrite;
 				if (overwrite == "y")
 					break;
@@ -111,8 +112,8 @@ void list_encrypt(struct binary_reg *head, std::string filename,
 	write_file.close();
 }
 
-void list_decrypt(struct binary_reg **head, struct binary_reg **tail,
-				  std::string master_key, std::string master_iv, std::ifstream *read_file)
+void list_decrypt(struct binary_reg **head, struct binary_reg **tail, std::string master_key,
+				  std::string master_iv, std::ifstream *read_file)
 {
 	// Load the necessary cipher
 	EVP_add_cipher(EVP_aes_256_cbc());

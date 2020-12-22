@@ -141,7 +141,57 @@ std::string get_pass(bool show_asterisk)
 				std::cout << '*';
 		}
 	}
-
 	std::cout << std::endl;
+
 	return password;
+}
+
+bool get_master(std::string &sha256_key, std::string &sha256_iv)
+{
+	std::string master_key, master_iv;
+	while (true)
+	{
+		std::cout << "enter master key:\t";
+		sha256_key = sha256(get_pass(true));
+
+		std::cout << "re-enter master key:\t";
+		if (sha256((master_key = get_pass(true))) != sha256_key)
+		{
+			std::cout << "(your passwords did not match, please retry)"
+					  << std::endl
+					  << std::endl;
+
+			continue;
+		}
+
+		break;
+	}
+
+	while (true)
+	{
+		std::cout << "enter master iv:\t";
+		sha256_iv = sha256(master_iv = get_pass(true));
+		if (sha256_key == sha256_iv)
+		{
+			std::cout << "(your iv is the same with key, please retry)"
+					  << std::endl
+					  << std::endl;
+
+			continue;
+		}
+
+		std::cout << "re-enter master iv:\t";
+		if (sha256((master_iv = get_pass(true))) != sha256_iv)
+		{
+			std::cout << "(your ivs did not match, please retry)"
+					  << std::endl
+					  << std::endl;
+
+			continue;
+		}
+
+		break;
+	}
+
+	return true;
 }

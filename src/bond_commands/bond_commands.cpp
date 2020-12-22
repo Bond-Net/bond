@@ -1,18 +1,18 @@
 #include "bond_commands.hpp"
 
-typedef struct binary_reg
-{
-	char identity[128];
-	char username[128];
-	char password[128];
+// typedef struct binary_reg
+// {
+// 	char identity[128];
+// 	char username[128];
+// 	char password[128];
 
-	int identity_len;
-	int username_len;
-	int password_len;
+// 	int identity_len;
+// 	int username_len;
+// 	int password_len;
 
-	struct binary_reg *next;
-	struct binary_reg *prev;
-} binary_reg;
+// 	struct binary_reg *next;
+// 	struct binary_reg *prev;
+// } binary_reg;
 
 bool insert(struct binary_reg **head, struct binary_reg **tail)
 {
@@ -174,17 +174,15 @@ bool list_from(struct binary_reg *head)
 					 "to see credentials: ";
 		std::cin >> msg;
 
-		struct binary_reg *reader = head;
-		while (reader != NULL)
+		for (struct binary_reg *reader = head; reader != NULL; reader = reader->next)
 		{
-			if (strcmp(reader->identity, msg) != 0)
+			if (strcmp(reader->identity, msg) == 0)
 			{
-				printf("identity: %-25s username: "
-					   "%-25s password: "
-					   "%-25s\n",
+				printf("identity: %-25s username: %-25s password: %-25s\n",
 					   reader->identity, reader->username, reader->password);
+
+				break;
 			}
-			reader = reader->next;
 		}
 	}
 
@@ -221,4 +219,9 @@ bool edit(struct binary_reg *head)
 	}
 
 	return true;
+}
+
+bool change_master(std::string &sha256_key, std::string &sha256_iv)
+{
+	return get_master(sha256_key, sha256_iv);
 }

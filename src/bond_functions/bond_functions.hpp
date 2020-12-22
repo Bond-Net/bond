@@ -16,6 +16,8 @@
 
 #include <termios.h>
 
+#include "../cryptography/crypt_ssl.hpp"
+
 typedef struct binary_reg
 {
 	char identity[128];
@@ -35,5 +37,6 @@ bool file_exists(const std::string &name);
 bool arg_int(int argc, char **argv, std::string *filename, bool *verbose);
 int getch(void);
 std::string get_pass(bool show_asterisk);
+bool get_master(std::string &sha256_key, std::string &sha256_iv);
 
 #endif // BOND_HELP_H
