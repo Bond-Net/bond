@@ -23,10 +23,10 @@ Bond can be used as a local password manager that safely encrypts all your passw
 
 Passwords are stored on a linked list and their encryption is written to a binary file. Passwords never leave the code without being encrypted to ensure no passwords are ever exposed to the outside world.
 
-Apart from using Bond as a safe way to store passwords locally, you can always connect to the [**BONDnet**](https://github.com/keybraker/BONDnet). The [**BONDnet**](https://github.com/keybraker/BONDnet) is a program that connects you to the BOND network where segments of password lists is shared across multiple computers.
+Apart from using Bond as a safe way to store passwords locally, you can always connect to the BondNet. The BondNet is a program that connects you to the BOND network where segments of password lists is shared across multiple computers.
 
-When connecting to the [**BONDnet**](https://github.com/keybraker/BONDnet) a bond-list with SHA-256 encryption is created with the same master-key. Then fragments the key-vault and distributes them to your bonds in your bond-list.
-> more information [**here**](https://github.com/keybraker/BONDnet)
+When connecting to the BondNet a bond-list with SHA-256 encryption is created with the same master-key. Then fragments the key-vault and distributes them to your bonds in your bond-list.
+> for more information about BondNet click [**here**](https://github.com/keybraker/BONDnet)
 
 ---
 
@@ -34,7 +34,7 @@ This decentralized approach allows for security-of-scale, which means the more b
 you have the safer your data is.<br>
 Users can store their data online without any-one entity having control over it. 
 Bonds are created per-user which allows users to create 
-relationships with other [**BONDnet**](https://github.com/keybraker/BONDnet) users.
+relationships with other BondNet users.
 
 ### What does Bond offer
 1. Strong password generator
@@ -59,7 +59,7 @@ relationships with other [**BONDnet**](https://github.com/keybraker/BONDnet) use
   
 ### Clean
 
-2.  In the Bond folder type
+3. In the Bond folder type
 
         $ make clean
 
@@ -68,7 +68,7 @@ relationships with other [**BONDnet**](https://github.com/keybraker/BONDnet) use
 ### Execute Bond
 The first time you run BOND you will have no key list so you have to make one by pressing ```./bond```. You will be asked to give a master password (which you have to never forget as there is no way to recover your passwords if lost) and then you will can use BOND. All BOND commands can be seen [here](#3-2).
 
-1.  Execute
+4. Execute
 
         $ ./bond
 
