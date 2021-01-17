@@ -18,8 +18,6 @@
 
 ---
 
-## About Bond
-
 ### How Bond works
 Bond can be used as a local password manager that safely encrypts all your passwords on your computer with one master key you-and-only-you have. Encryptions are compared so that the master key is never stored anywhere.
 
