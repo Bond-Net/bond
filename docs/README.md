@@ -87,7 +87,7 @@ The first time you run BOND you will have no key list so you have to make one by
 
 TBI
 
-## Acknowledgements
+---
 
 > Author - **Ioannis Tsiakkas** - _[Keybraker](https://github.com/keybraker)_<br>
 > License - _[GNU LICENSE](http://www.gnu.org/philosophy/free-sw.html)_<br>
